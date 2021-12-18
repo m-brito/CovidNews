@@ -5,12 +5,14 @@ from datetime import datetime
 
 from gerais import *
 from usuario import *
+from relatorio import *
 from configuracoes import *
 
 BDusuarios = {}
 BDrelatorio = {}
 BDconfiguracoes = []
 recuperaUsuarios(BDusuarios)
+recuperaRelatorios(BDrelatorio)
 BDconfiguracoes = recuperaConfiguracoes()
 
 def verificarConfiguracoes(msgErro):
@@ -35,6 +37,7 @@ while ( opc != 0 and opc > 0 and opc <4 ):
     elif opc == 2:
         BDconfiguracoes = recuperaConfiguracoes()
         if verificarConfiguracoes('Voce não consegue acessar aqui sem antes configurar o app!!!') == True:
+            menuRelatorios(BDrelatorio)
             print("\n\n\n\n")
 
     elif opc == 3:
