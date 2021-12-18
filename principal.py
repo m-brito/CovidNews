@@ -1,17 +1,28 @@
-import pyautogui
 import time
-import pyperclip
-import pandas as pd
 import os
+
+from datetime import datetime
+
 from gerais import *
-from IPython.display import display
+from usuario import *
+
 
 BDusuarios = {}
+BDrelatorio = {}
+BDconfiguracoes = []
 recuperaUsuarios(BDusuarios)
+
+
+def verificarConfiguracoes(msgErro):
+    if len(BDconfiguracoes) == 0:
+        print(f'\n====================================================================\n{msgErro}\n====================================================================\n')
+        return False
+    else:
+        return True
 
 opc = 1
 
-while ( opc != 0 and opc > 0 and opc <3 ):
+while ( opc != 0 and opc > 0 and opc <4 ):
     menu()
 
     opc = int( input("Digite uma opção: ") )
@@ -21,11 +32,12 @@ while ( opc != 0 and opc > 0 and opc <3 ):
         print("\n\n\n\n")
             
     elif opc == 2:
-        print("Codigo da opc 2")
+        if verificarConfiguracoes('Voce não consegue acessar aqui sem antes configurar o app!!!') == True:
+            print("\n\n\n\n")
+
+    elif opc == 3:
         print("\n\n\n\n")
 
 print("\n\n*** FIM DO PROGRAMA ***\n\n")
 
 os.system('pause')
-
-
