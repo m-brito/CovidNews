@@ -129,3 +129,36 @@ def menuUsuarios(dicUsuarios):
             
         elif opc == 6:
             gravaUsuarios(dicUsuarios)
+
+# ====Insere usuario INTERFACE====
+def insereUsuarioInterface(dic, email, nome):
+    if existeUsuario(dic, email):
+        print("Usuario já cadastrado!")
+    else:
+        dic[email]=(nome)
+        print("Dados inseridos com sucesso!")
+
+# ====Remove um usuario INTERFACE====
+def removeUsuarioInterface(dic,chave):
+    if existeUsuario(dic,chave):
+        del dic[chave]
+        print("Dados apagados com sucesso!")
+    else:
+        print("Pessoa não cadastrada!")
+
+# ====Altera usuario INTERFACE====
+def alteraUsuarioInterface(dic, chave, nome):
+    if existeUsuario(dic,chave):
+        mostraUsuario(dic,chave)
+        dic[chave]=(nome)
+        print("Dados alterados com sucesso!")
+    else:
+        print("Usuario não cadastrado!")
+
+# ====Exibe um usuario INTERFACE====
+def mostraUsuarioInterface(dic,chave):
+    if existeUsuario(dic,chave):
+        dados = dic[chave]
+        return(dados, chave)
+    else:
+        return(False, False)
