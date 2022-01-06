@@ -18,6 +18,18 @@ def dataAtualF():
     dataAtual = date.today()
     dataFormatada = dataAtual.strftime('%d/%m/%Y')
     return dataFormatada
+def dataAtualFArquivo():
+    dataAtual = date.today()
+    dataFormatada = dataAtual.strftime('%d-%m-%Y')
+    return dataFormatada
+def mesAtual():
+    dataAtual = date.today()
+    dataFormatada = dataAtual.strftime('%m')
+    return dataFormatada
+def anoAtual():
+    dataAtual = date.today()
+    dataFormatada = dataAtual.strftime('%Y')
+    return dataFormatada
 
 def pausa():
     input("Tecle <ENTER> para continuar...\n")

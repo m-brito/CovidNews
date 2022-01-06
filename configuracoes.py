@@ -6,24 +6,25 @@ import pandas as pd
 import os
 from IPython.display import display
 from gerais import *
+from tkinter import messagebox
 
 # ===================Configuracoes==============
 # ====Insere configuracoes====
-def insereConfiguracoes(listaConfiguracoes, positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY):
+def insereConfiguracoes(listaConfiguracoes, positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y):
     if len(listaConfiguracoes) > 0:
         print("Configuracao já cadastrada!")
         pausa()
     else:
-        listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY]
+        listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y]
         return listaConfiguracoes
 
 # ====Altera configuracoes====
-def alteraConfiguracoes(listaConfiguracoes, positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY):
+def alteraConfiguracoes(listaConfiguracoes, positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y):
     if len(listaConfiguracoes) > 0:
         mostraTodasConfiguracoes(listaConfiguracoes)
         confirma = input("Tem certeza que deseja atualiza-la? (S/N): ").upper()
         if confirma == 'S':
-            listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY]
+            listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y]
             return listaConfiguracoes
         else:
             print("Alteração cancelada!")
@@ -45,8 +46,10 @@ def removeConfiguracoes(listaConfiguracoes):
 def mostraTodasConfiguracoes(listConfiguracoes):
     if len(listConfiguracoes)>0:
         print("Relatório: Todas as configuracoes\n")
-        print(f"Posicao do arquivo X: {listConfiguracoes[0]}")
-        print(f"Posicao do arquivo Y: {listConfiguracoes[1]}")
+        print(f"Posicao do arquivo 1 X: {listConfiguracoes[0]}")
+        print(f"Posicao do arquivo 1 Y: {listConfiguracoes[1]}")
+        print(f"Posicao do arquivo 2 X: {listConfiguracoes[8]}")
+        print(f"Posicao do arquivo 2 Y: {listConfiguracoes[9]}")
         print(f"Posicao dos tres pontos X: {listConfiguracoes[2]}")
         print(f"Posicao dos tres pontos Y: {listConfiguracoes[3]}")
         print(f"Posicao do 'fazer download' X: {listConfiguracoes[4]}")
@@ -62,7 +65,7 @@ def mostraTodasConfiguracoes(listConfiguracoes):
 def gravaConfiguracoes(listaConfiguracoes):
     if len(listaConfiguracoes) > 0:
         arq = open("configuracoes.txt", "w")
-        linha = f"{listaConfiguracoes[0]};{listaConfiguracoes[1]};{listaConfiguracoes[2]};{listaConfiguracoes[3]};{listaConfiguracoes[4]};{listaConfiguracoes[5]};{listaConfiguracoes[6]};{listaConfiguracoes[7]}\n"
+        linha = f"{listaConfiguracoes[0]};{listaConfiguracoes[1]};{listaConfiguracoes[2]};{listaConfiguracoes[3]};{listaConfiguracoes[4]};{listaConfiguracoes[5]};{listaConfiguracoes[6]};{listaConfiguracoes[7]};{listaConfiguracoes[8]};{listaConfiguracoes[9]}\n"
         arq.write(linha)
         arq.close()
     else:
@@ -81,13 +84,15 @@ def recuperaConfiguracoes():
             lista = linha.split(";")
             positionArqX = lista[0]
             positionArqY = lista[1]
+            positionArq2X = lista[8]
+            positionArq2Y = lista[9]
             positionTresPontosX = lista[2]
             positionTresPontosY = lista[3]
             positionFazerDownloadX = lista[4]
             positionFazerDownloadY = lista[5]
             positionEmailX = lista[6]
             positionEmailY = lista[7]
-            listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY]
+            listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y]
         return listaConfiguracoes
     else:
         return []
@@ -108,7 +113,7 @@ def retornarConfigsParaPrograma():
     time.sleep(0.5)
     pyautogui.press('enter')
 
-    pyautogui.alert('Coloque o mouse no arquivo!')
+    pyautogui.alert('Coloque o mouse no arquivo 1!')
 
     time.sleep(5)
 
@@ -116,7 +121,17 @@ def retornarConfigsParaPrograma():
     positionArqX = list(pontoMouse)[0]
     positionArqY = list(pontoMouse)[1]
 
-    pyautogui.alert('Clique no arquivo!')
+    time.sleep(2)
+
+    pyautogui.alert('Coloque o mouse no arquivo 2!')
+
+    time.sleep(5)
+
+    pontoMouse = pyautogui.position()
+    positionArq2X = list(pontoMouse)[0]
+    positionArq2Y = list(pontoMouse)[1]
+
+    pyautogui.alert('Clique no arquivo 1!')
     time.sleep(2)
     pyautogui.alert('Coloque o mouse nos tres pontinhos!')
 
@@ -124,20 +139,18 @@ def retornarConfigsParaPrograma():
 
     pontoMouse = pyautogui.position()
 
-    pyautogui.alert(pontoMouse)
+    # pyautogui.alert(pontoMouse)
     
     positionTresPontosX = list(pontoMouse)[0]
     positionTresPontosY = list(pontoMouse)[1]
 
-    pyautogui.alert('Clique nos tres pontinhos!')
-    time.sleep(2)
-    pyautogui.alert('Coloque o mouse no "fazer download"!')
+    pyautogui.alert('Clique nos tres pontinhos e coloque o mouse no "fazer download"!')
 
     time.sleep(5)
 
     pontoMouse = pyautogui.position()
 
-    pyautogui.alert(pontoMouse)
+    # pyautogui.alert(pontoMouse)
 
     positionFazerDownloadX = list(pontoMouse)[0]
     positionFazerDownloadY = list(pontoMouse)[1]
@@ -163,7 +176,7 @@ def retornarConfigsParaPrograma():
 
     pyautogui.alert("Configuracao feita com sucesso, voce ja pode usar o computador normalmente!")
 
-    return [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY]
+    return [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y]
 
 # ====Menu de configuracoes====
 def menuConfiguracoes(listConfiguracoes):
@@ -188,7 +201,7 @@ def menuConfiguracoes(listConfiguracoes):
 
                 configs = retornarConfigsParaPrograma()
 
-                listConfiguracoes = insereConfiguracoes(listConfiguracoes, configs[0], configs[1], configs[2], configs[3], configs[4], configs[5], configs[6], configs[7])
+                listConfiguracoes = insereConfiguracoes(listConfiguracoes, configs[0], configs[1], configs[2], configs[3], configs[4], configs[5], configs[6], configs[7], configs[8], configs[9])
 
                 print("Dados inseridos com sucesso!")
 
@@ -208,3 +221,58 @@ def menuConfiguracoes(listConfiguracoes):
 
         elif opc == 5:
             gravaConfiguracoes(listConfiguracoes)
+
+# ======================================================================
+
+# ======Pega dados do arquivo - INTERFACE====
+def recuperaConfiguracoesInterface():
+    if (existe_arquivo("configuracoes.txt")):
+        arq = open("configuracoes.txt", "r")
+        listaConfiguracoes = []
+        for linha in arq:
+            linha = linha[:len(linha)-1]
+            lista = linha.split(";")
+            positionArqX = lista[0]
+            positionArqY = lista[1]
+            positionArq2X = lista[8]
+            positionArq2Y = lista[9]
+            positionTresPontosX = lista[2]
+            positionTresPontosY = lista[3]
+            positionFazerDownloadX = lista[4]
+            positionFazerDownloadY = lista[5]
+            positionEmailX = lista[6]
+            positionEmailY = lista[7]
+            listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y]
+        return listaConfiguracoes
+    else:
+        return []
+
+# ====Remove configuracoes - INTERFACE====
+def removeConfiguracoesInterface(listaConfiguracoes):
+    if len(listaConfiguracoes) > 0:
+        listaConfiguracoes = []
+        return listaConfiguracoes
+    else:
+        print("Configuracoes não cadastradas!")
+        return []
+
+# ====Insere configuracoes - INTERFACE====
+def insereConfiguracoesInterface(listaConfiguracoes, positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y):
+    if len(listaConfiguracoes) > 0:
+        print("Configuracao já cadastrada!")
+    else:
+        listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y]
+        return listaConfiguracoes
+
+# ====Altera configuracoes - INTERFACE====
+def alteraConfiguracoesInterface(listaConfiguracoes, positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y):
+    if len(listaConfiguracoes) > 0:
+        confirma = messagebox.askokcancel("Certeza", "Tem certeza que deseja atualiza-la?: ")
+        if confirma == True:
+            listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y]
+            return listaConfiguracoes
+        else:
+            print("Alteração cancelada!")
+            return listaConfiguracoes
+    else:
+        print("Configuracoes não cadastradas!")

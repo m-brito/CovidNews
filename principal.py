@@ -1,4 +1,5 @@
 from ctypes import BigEndianStructure
+from io import DEFAULT_BUFFER_SIZE
 import time
 import os
 
@@ -77,10 +78,75 @@ class FuncsUsuarios():
             self.emailEntry.insert(END, respEmail)
             self.nomeEntry.insert(END, respNome)
 
-class AplicationRelatorio():
+class FuncConfiguracoes():
+    def mostrarConfigs(self):
+        BDconfiguracoes = recuperaConfiguracoesInterface()
+        if(len(BDconfiguracoes)>=1):
+            self.editarLblPA(BDconfiguracoes[0], BDconfiguracoes[1])
+            self.editarLblPTP(BDconfiguracoes[2], BDconfiguracoes[3])
+            self.editarLblPFD(BDconfiguracoes[4], BDconfiguracoes[5])
+            self.editarLblPE(BDconfiguracoes[6], BDconfiguracoes[7])
+        else:
+            self.resetarLbl()
+
+    def editarLblPA(self, px, py):
+        self.lblArquivo['text'] = f'Posição do arquivo: ({px}, {py})'
+
+    def editarLblPTP(self, px, py):
+        self.lblTresPontos['text'] = f'Posição dos três pontos: ({px}, {py})'
+
+    def editarLblPFD(self, px, py):
+        self.lblFzrDownload['text'] = f'Posição do "Fazer Donwload": ({px}, {py})'
+
+    def editarLblPE(self, px, py):
+        self.lblEmail['text'] = f'Posição do "Escrever": ({px}, {py})'
+
+    def resetarLbl(self):
+        self.lblArquivo['text'] = 'Posição do arquivo: (Nenhum, Nenhum)'
+        self.lblTresPontos['text'] = 'Posição dos três pontos: (Nenhum, Nenhum)'
+        self.lblFzrDownload['text'] = 'Posição do "Fazer Donwload": (Nenhum, Nenhum)'
+        self.lblEmail['text'] = 'Posição do "Escrever": (Nenhum, Nenhum)'
+
+    def apagarConfigs(self):
+        self.BDconfiguracoes = removeConfiguracoesInterface(self.BDconfiguracoes)
+        gravaConfiguracoes(self.BDconfiguracoes)
+        self.mostrarConfigs()
+
+    def cadConfiguracoes(self):
+        if len(self.BDconfiguracoes) <= 0:
+            configs = retornarConfigsParaPrograma()
+
+            self.BDconfiguracoes = insereConfiguracoes(self.BDconfiguracoes, configs[0], configs[1], configs[2], configs[3], configs[4], configs[5], configs[6], configs[7], configs[8], configs[9])
+            gravaConfiguracoes(self.BDconfiguracoes)
+            self.BDconfiguracoes = recuperaConfiguracoes()
+            self.mostrarConfigs()
+
+            print("Dados inseridos com sucesso!")
+        else:
+            print('Configuracoes ja feitas! Tente atualizar!')
+    
+    def atuaConfiguracoes(self):
+        if len(self.BDconfiguracoes) >=1:
+            configs = retornarConfigsParaPrograma()
+                
+            self.BDconfiguracoes = alteraConfiguracoesInterface(self.BDconfiguracoes, configs[0], configs[1], configs[2], configs[3], configs[4], configs[5], configs[6], configs[7])
+            gravaConfiguracoes(self.BDconfiguracoes)
+            self.mostrarConfigs()
+        else:
+            print("Nenhuma configuracao salva para atualizar!!")
+        
+class FuncRelatorio():
+    def criaRelatorio(self):
+        criarRelatorioInterface()
+
+
+class AplicationRelatorio(FuncRelatorio):
     def __init__(self):
         self.janelaRelatorios = Tk()
         self.telaRelatorios()
+        self.framesDaTela()
+        self.widgetsFrame1()
+        self.listaFrame2()
         self.menu()
         self.janelaRelatorios.mainloop()
     
@@ -95,8 +161,54 @@ class AplicationRelatorio():
         self.janelaRelatorios.geometry('700x500')
         self.janelaRelatorios.resizable(True, True)
         self.janelaRelatorios.maxsize(width=900, height=700)
-        self.janelaRelatorios.minsize(width=500, height=500)
+        self.janelaRelatorios.minsize(width=700, height=500)
         print('telinha de relatorios')
+    
+    def framesDaTela(self):
+        self.frame1 = Frame(self.janelaRelatorios, bd=4, bg='white', highlightbackground='#95D5B2', highlightthickness=2)
+        self.frame1.place(relx=0.02, rely=0.02, relwidth=0.96, relheight=0.36)
+
+        self.frame2 = Frame(self.janelaRelatorios, bd=4, bg='white', highlightbackground='#95D5B2', highlightthickness=2)
+        self.frame2.place(relx=0.02, rely=0.4, relwidth=0.96, relheight=0.56)
+
+    def widgetsFrame1(self):
+        self.btnLimpar = Button(self.frame1, text='Limpar', bg='#EBEBEB')
+        self.btnLimpar.place(relx=0.4, rely=0.1, relwidth=0.1, relheight=0.15)
+
+        self.btnBuscar = Button(self.frame1, text='Buscar', bg='#EBEBEB')
+        self.btnBuscar.place(relx=0.5, rely=0.1, relwidth=0.1, relheight=0.15)
+
+        self.btnNovo = Button(self.frame1, text='Criar', bg='#EBEBEB', command=self.criaRelatorio)
+        self.btnNovo.place(relx=0.8, rely=0.1, relwidth=0.1, relheight=0.15)
+
+        self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB')
+        self.btnApagar.place(relx=0.9, rely=0.1, relwidth=0.1, relheight=0.15)
+
+        # =========================================================
+
+        self.lblData = Label(self.frame1, text='Data', bg='white')
+        self.lblData.place(relx=0.01, rely=0.01)
+        self.dataEntry = Entry(self.frame1, bg='#EBEBEB')
+        self.dataEntry.place(relx=0.01, rely=0.11, relheight=0.15, relwidth=0.3)
+    
+    def listaFrame2(self):
+        self.listaRelatorio = ttk.Treeview(self.frame2, height=4, columns=('col1', 'col2', 'col3'))
+        self.listaRelatorio.heading('#0', text='')
+        self.listaRelatorio.heading('#1', text='Data')
+        self.listaRelatorio.heading('#2', text='Dado 1')
+        self.listaRelatorio.heading('#3', text='Dado 2')
+
+        self.listaRelatorio.column('#0', width=1)
+        self.listaRelatorio.column('#1', width=200)
+        self.listaRelatorio.column('#2', width=200)
+        self.listaRelatorio.column('#3', width=200)
+
+        self.listaRelatorio.place(relx=0.01, rely=0.1, relwidth=0.95, relheight=0.8)
+
+        self.scrollLista = Scrollbar(self.frame2, orient='vertical')
+        self.listaRelatorio.configure(yscroll=self.scrollLista.set)
+        self.scrollLista.place(relx=0.96, rely=0.1, relwidth=0.04, relheight=0.8)
+        # self.listaRelatorio.bind('<Double-1>', self.duploClique)
 
     def telaConfiguracoes(self):
         self.janelaRelatorios.destroy()
@@ -116,10 +228,14 @@ class AplicationRelatorio():
         fileMenu.add_command(label='Relatorios', command= self.telaRelatorios)
         fileMenu.add_command(label='Configuracoes', command= self.telaConfiguracoes)
 
-class AplicationConfiguracoes():
+class AplicationConfiguracoes(FuncConfiguracoes):
     def __init__(self):
+        self.BDconfiguracoes = list(BDconfiguracoes)
         self.janelaConfiguracoes = Tk()
         self.telaConfiguracoes()
+        self.framesDaTela()
+        self.widgetsFrame1()
+        self.mostrarConfigs()
         self.menu()
         self.janelaConfiguracoes.mainloop()
     
@@ -139,8 +255,40 @@ class AplicationConfiguracoes():
         self.janelaConfiguracoes.geometry('700x500')
         self.janelaConfiguracoes.resizable(True, True)
         self.janelaConfiguracoes.maxsize(width=900, height=700)
-        self.janelaConfiguracoes.minsize(width=500, height=500)
+        self.janelaConfiguracoes.minsize(width=700, height=500)
         print('telinha de configuracoes')
+    
+    def framesDaTela(self):
+        self.frame1 = Frame(self.janelaConfiguracoes, bd=4, bg='white', highlightbackground='#95D5B2', highlightthickness=2)
+        self.frame1.place(relx=0.02, rely=0.02, relwidth=0.96, relheight=0.96)
+
+    def widgetsFrame1(self):
+        self.btnNovo = Button(self.frame1, text='Cadastrar', bg='#EBEBEB', command=self.cadConfiguracoes)
+        self.btnNovo.place(relx=0.01, rely=0.01, relwidth=0.98, relheight=0.10)
+
+        self.btnAtualizar = Button(self.frame1, text='Atualizar', bg='#EBEBEB', command=self.atuaConfiguracoes)
+        self.btnAtualizar.place(relx=0.01, rely=0.13, relwidth=0.98, relheight=0.10)
+
+        self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB', command=self.apagarConfigs)
+        self.btnApagar.place(relx=0.01, rely=0.25, relwidth=0.98, relheight=0.10)
+
+        self.lblArquivo = Label(self.frame1, text='Posicao do arquivo: (Nenhum, Nenhum)', bg='white')
+        self.lblArquivo.place(relx=0.35, rely=0.45)
+
+        self.lblTresPontos = Label(self.frame1, text='Posicao dos tres pontos: (Nenhum, Nenhum)', bg='white')
+        self.lblTresPontos.place(relx=0.35, rely=0.5)
+
+        self.lblFzrDownload = Label(self.frame1, text='Posicao do "Fazer download": (Nenhum, Nenhum)', bg='white')
+        self.lblFzrDownload.place(relx=0.35, rely=0.55)
+
+        self.lblEmail = Label(self.frame1, text='Posicao do "Escrever": (Nenhum, Nenhum)', bg='white')
+        self.lblEmail.place(relx=0.35, rely=0.6)
+
+        self.lblAvisoFixo = Label(self.frame1, text='Dados Fixos:', bg='white')
+        self.lblAvisoFixo.place(relx=0.01, rely=0.90)
+
+        self.lblLinkDrive = Label(self.frame1, text='Link do arquivo usado: https://drive.google.com/drive/folders/1dSPGvocU1Tp-KobogpWfCBJF8QXEcSCY?usp=sharing', bg='white')
+        self.lblLinkDrive.place(relx=0.01, rely=0.94)
 
     def menu(self):
         menuBar = Menu(self.janelaConfiguracoes)
@@ -181,7 +329,7 @@ class AplicationUsuarios(FuncsUsuarios):
         self.janelaUsuarios.geometry('700x500')
         self.janelaUsuarios.resizable(True, True)
         self.janelaUsuarios.maxsize(width=900, height=700)
-        self.janelaUsuarios.minsize(width=500, height=500)
+        self.janelaUsuarios.minsize(width=700, height=500)
         print('telinha de usuarios')
 
     def framesDaTela(self):
