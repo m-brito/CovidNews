@@ -14,6 +14,9 @@ from usuario import *
 from relatorio import *
 from configuracoes import *
 
+import webbrowser
+from pathlib import Path
+
 BDusuarios = {}
 BDrelatorio = {}
 BDconfiguracoes = []
@@ -185,6 +188,16 @@ class FuncRelatorio():
             self.lblEnviou['text'] = f'Enviou email: {respEnviou}'
             self.lblAtualizou['text'] = f'Atualizou: {respAtualizou}'
 
+    def abrirRelatorio(self):
+        self.variaveis()
+        data = str(self.campoData).replace('/', '-')
+        path = os.getcwd()
+        diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{data}.pdf"
+        if Path(diretorio).is_file():
+            webbrowser.open(diretorio)
+        else:
+            print("O arquivo não existe!!!")
+
 
 class AplicationRelatorio(FuncRelatorio):
     def __init__(self):
@@ -231,7 +244,7 @@ class AplicationRelatorio(FuncRelatorio):
         self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB', command=self.deletarRelatorio)
         self.btnApagar.place(relx=0.9, rely=0.1, relwidth=0.1, relheight=0.15)
 
-        self.btnAbrir = Button(self.frame1, text='Abrir', bg='#EBEBEB')
+        self.btnAbrir = Button(self.frame1, text='Abrir', bg='#EBEBEB', command=self.abrirRelatorio)
         self.btnAbrir.place(relx=0.9, rely=0.28, relwidth=0.1, relheight=0.15)
 
         # =========================================================
