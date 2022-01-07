@@ -25,6 +25,9 @@ from datetime import datetime, timedelta
 import shutil
 import zipfile
 
+import webbrowser
+from pathlib import Path
+
 BDconfiguracoes = recuperaConfiguracoes()
 BDusuariosRelatorio = {}
 recuperaUsuarios(BDusuariosRelatorio)
@@ -54,12 +57,8 @@ def existeRelatorio(dic,chave):
 # ====Insere relatorio==== +++++++++++++++++++++++++++++++++++++++++++++DADOS PROVISORIOS PARA BAIXO
 def insereRelatorio(dic, dado1, dado2):
     data = dataAtualF()
-    confirma = input(f"Deseja usar a data {data}? (S/N): ").upper()
-    if confirma == 'N':
-        data = input('Informe a data (dd/mm/yyyy): ')
     if existeRelatorio(dic, data):
-        print("Relatorio já cadastrado!")
-        pausa()
+        alteraRelatorio(dic, data, dado1, "SIM")
     else:
         dic[data]=(dado1, dado2)
         print("Dados inseridos com sucesso!")
@@ -121,7 +120,6 @@ def mostraTodosRelatorios(dic):
 # ======Grava dados no arquivo=====
 def gravaRelatorios(dic):
     arq = open("relatorio.txt", "w")
-    print(dic)
     for data in dic:
         tupla = dic[data]
         linha = data+";"+tupla[0]+";"+tupla[1]+"\n"
@@ -176,7 +174,7 @@ def grafico1(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/RelatoriosEgraficos/totalDeCasosEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"\\RelatoriosEgraficos\\totalDeCasosEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico2(tabela, dataRelatorioArquivo):
@@ -184,7 +182,7 @@ def grafico2(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/RelatoriosEgraficos/casosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"\\RelatoriosEgraficos\\casosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico3(tabela, dataRelatorioArquivo):
@@ -192,7 +190,7 @@ def grafico3(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/RelatoriosEgraficos/obitosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"\\RelatoriosEgraficos\\obitosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico4(tabela, dataRelatorioArquivo):
@@ -203,7 +201,7 @@ def grafico4(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"\\RelatoriosEgraficos\\dadosEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico5(tabela, listaDatas, dataRelatorioArquivo):
@@ -257,7 +255,7 @@ def grafico5(tabela, listaDatas, dataRelatorioArquivo):
 
     fig.tight_layout()
 
-    plt.savefig(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"\\RelatoriosEgraficos\\dadosComparativos-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos):
@@ -356,7 +354,7 @@ def enviarRelatorioEmail(dataParaArquivo, dataFormatada):
     pyautogui.hotkey('ctrl', 'v')
     time.sleep(1)
     pyautogui.press('enter')
-    time.sleep(8)
+    time.sleep(10)
     pyautogui.click(int(BDconfiguracoes[6]), int(BDconfiguracoes[7]), clicks=1)
     time.sleep(1)
     for email in BDusuariosRelatorio:
@@ -394,7 +392,7 @@ def enviarRelatorioEmail(dataParaArquivo, dataFormatada):
     time.sleep(1)
     pyautogui.press('enter')
 
-    time.sleep(0.5)
+    time.sleep(2)
     pyautogui.hotkey('ctrl', 'w')
     shutil.rmtree(diretorioPastaZipar)
     os.remove(diretorioRelatorioZip)
@@ -417,17 +415,19 @@ class PDF(FPDF, HTMLMixin):
 # ====Menu de relatorios====
 def menuRelatorios(dicRelatorios):
     opc = 1
-    while ( opc != 4 and opc > 0 and opc <6):
+    while (opc != 6):
         print("\nGerenciamento de relatorios:\n")
         print("1 - Criar relatorio de hoje (Forma automatica)!")
         print("2 - Mostra um relatorio")
         print("3 - Mostra todos os relatorios")
-        print("4 - Sair do menu de relatorios")
-        print("5 - Teste")
+        print("4 - Abrir")
+        print("5 - Enviar")
+        print("6 - Sair do menu de relatorios")
 
         opc = int( input("Digite uma opção: ") )
 
         if opc ==1:
+            path = os.getcwd()
             dataRelatorioArquivo = dataAtualFArquivo()
             BDconfiguracoes = recuperaConfiguracoes()
             recuperaUsuarios(BDusuariosRelatorio)
@@ -439,7 +439,7 @@ def menuRelatorios(dicRelatorios):
                 print("3 - Siga os passos explicados no pdf!!!")
             elif confirma == "S":
                 if len(BDconfiguracoes) > 9:
-                    baixarArquivos()
+                    # baixarArquivos()
                     
                     tabela = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-estado.xlsx")
                     tabela3 = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx")
@@ -494,6 +494,9 @@ def menuRelatorios(dicRelatorios):
 
                     if confirma == "S":
                         enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
+                        insereRelatorio(dicRelatorios, "SIM", "NÃO")
+                    else:
+                        insereRelatorio(dicRelatorios, "NÃO", "NÃO")
     
         elif opc == 2:
             data=input("Data a ser consultada: ")
@@ -502,6 +505,34 @@ def menuRelatorios(dicRelatorios):
             
         elif opc == 3:
             mostraTodosRelatorios(dicRelatorios)
+
+        elif opc == 4:
+            data = input("Informe a data do relatorio no formato 'dd/mm/yyyy': ")
+            data = str(data).replace('/', '-')
+            path = os.getcwd()
+            diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{data}.pdf"
+            if Path(diretorio).is_file():
+                webbrowser.open(diretorio)
+            else:
+                print("O arquivo não existe!!!")
+            
+        elif opc == 5:
+            data = input("Informe a data do relatorio no formato 'dd/mm/yyyy': ")
+            dataArq = str(data).replace('/', '-')
+            path = os.getcwd()
+            diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataArq}.pdf"
+            if Path(diretorio).is_file():
+                enviarRelatorioEmail(dataArq, data)
+                respData, respEnviou, respAtualizou = mostraRelatorioInterface(dicRelatorios, data)
+                alteraRelatorioInterface(dicRelatorios, respData, "SIM", respAtualizou)
+                gravaRelatorios(dicRelatorios)
+                recuperaRelatorios(dicRelatorios)
+                print("Relatorio enviado com sucesso")
+            else:
+                print("O arquivo não existe!!!")
+
+        elif opc == 6:
+            gravaRelatorios(dicRelatorios)
         
 # =====================================================================
 

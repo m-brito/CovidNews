@@ -86,6 +86,7 @@ class FuncConfiguracoes():
         BDconfiguracoes = recuperaConfiguracoesInterface()
         if(len(BDconfiguracoes)>=1):
             self.editarLblPA(BDconfiguracoes[0], BDconfiguracoes[1])
+            self.editarLblPA2(BDconfiguracoes[8], BDconfiguracoes[9])
             self.editarLblPTP(BDconfiguracoes[2], BDconfiguracoes[3])
             self.editarLblPFD(BDconfiguracoes[4], BDconfiguracoes[5])
             self.editarLblPE(BDconfiguracoes[6], BDconfiguracoes[7])
@@ -93,7 +94,10 @@ class FuncConfiguracoes():
             self.resetarLbl()
 
     def editarLblPA(self, px, py):
-        self.lblArquivo['text'] = f'Posição do arquivo: ({px}, {py})'
+        self.lblArquivo['text'] = f'Posição do arquivo 1: ({px}, {py})'
+
+    def editarLblPA2(self, px, py):
+        self.lblArquivo2['text'] = f'Posição do arquivo 2: ({px}, {py})'
 
     def editarLblPTP(self, px, py):
         self.lblTresPontos['text'] = f'Posição dos três pontos: ({px}, {py})'
@@ -105,7 +109,8 @@ class FuncConfiguracoes():
         self.lblEmail['text'] = f'Posição do "Escrever": ({px}, {py})'
 
     def resetarLbl(self):
-        self.lblArquivo['text'] = 'Posição do arquivo: (Nenhum, Nenhum)'
+        self.lblArquivo['text'] = 'Posição do arquivo 1: (Nenhum, Nenhum)'
+        self.lblArquivo2['text'] = 'Posição do arquivo 2: (Nenhum, Nenhum)'
         self.lblTresPontos['text'] = 'Posição dos três pontos: (Nenhum, Nenhum)'
         self.lblFzrDownload['text'] = 'Posição do "Fazer Donwload": (Nenhum, Nenhum)'
         self.lblEmail['text'] = 'Posição do "Escrever": (Nenhum, Nenhum)'
@@ -372,17 +377,20 @@ class AplicationConfiguracoes(FuncConfiguracoes):
         self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB', command=self.apagarConfigs)
         self.btnApagar.place(relx=0.01, rely=0.25, relwidth=0.98, relheight=0.10)
 
-        self.lblArquivo = Label(self.frame1, text='Posicao do arquivo: (Nenhum, Nenhum)', bg='white')
+        self.lblArquivo = Label(self.frame1, text='Posicao do arquivo 1: (Nenhum, Nenhum)', bg='white')
         self.lblArquivo.place(relx=0.35, rely=0.45)
 
+        self.lblArquivo2 = Label(self.frame1, text='Posicao do arquivo 2: (Nenhum, Nenhum)', bg='white')
+        self.lblArquivo2.place(relx=0.35, rely=0.5)
+
         self.lblTresPontos = Label(self.frame1, text='Posicao dos tres pontos: (Nenhum, Nenhum)', bg='white')
-        self.lblTresPontos.place(relx=0.35, rely=0.5)
+        self.lblTresPontos.place(relx=0.35, rely=0.55)
 
         self.lblFzrDownload = Label(self.frame1, text='Posicao do "Fazer download": (Nenhum, Nenhum)', bg='white')
-        self.lblFzrDownload.place(relx=0.35, rely=0.55)
+        self.lblFzrDownload.place(relx=0.35, rely=0.6)
 
         self.lblEmail = Label(self.frame1, text='Posicao do "Escrever": (Nenhum, Nenhum)', bg='white')
-        self.lblEmail.place(relx=0.35, rely=0.6)
+        self.lblEmail.place(relx=0.35, rely=0.65)
 
         self.lblAvisoFixo = Label(self.frame1, text='Dados Fixos:', bg='white')
         self.lblAvisoFixo.place(relx=0.01, rely=0.90)
@@ -466,6 +474,9 @@ class AplicationUsuarios(FuncsUsuarios):
         self.lblNome.place(relx=0.01, rely=0.4)
         self.nomeEntry = Entry(self.frame1, bg='#EBEBEB')
         self.nomeEntry.place(relx=0.01, rely=0.5, relheight=0.15, relwidth=0.989)
+
+        # self.Tipvar = StringVar(self.frame1)
+        # self.TipV = ("")
 
     def listaFrame2(self):
         self.listaUsuarios = ttk.Treeview(self.frame2, height=4, columns=('col1', 'col2'))
