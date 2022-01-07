@@ -121,6 +121,7 @@ def mostraTodosRelatorios(dic):
 # ======Grava dados no arquivo=====
 def gravaRelatorios(dic):
     arq = open("relatorio.txt", "w")
+    print(dic)
     for data in dic:
         tupla = dic[data]
         linha = data+";"+tupla[0]+";"+tupla[1]+"\n"
@@ -175,7 +176,7 @@ def grafico1(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/totalDeCasosEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"/RelatoriosEgraficos/totalDeCasosEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico2(tabela, dataRelatorioArquivo):
@@ -183,7 +184,7 @@ def grafico2(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/casosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"/RelatoriosEgraficos/casosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico3(tabela, dataRelatorioArquivo):
@@ -191,7 +192,7 @@ def grafico3(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/obitosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"/RelatoriosEgraficos/obitosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico4(tabela, dataRelatorioArquivo):
@@ -202,7 +203,7 @@ def grafico4(tabela, dataRelatorioArquivo):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/dadosEstado-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def grafico5(tabela, listaDatas, dataRelatorioArquivo):
@@ -256,7 +257,7 @@ def grafico5(tabela, listaDatas, dataRelatorioArquivo):
 
     fig.tight_layout()
 
-    plt.savefig(path+"/GraficosRelatorios/dadosComparativos-"+str(dataRelatorioArquivo)+".png")
+    plt.savefig(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos):
@@ -321,17 +322,17 @@ def gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos):
 def enviarRelatorioEmail(dataParaArquivo, dataFormatada):
     diretorio = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}"
     os.makedirs(diretorio)
-    casosAntes = f"{path}\\GraficosRelatorios\\casosPorDiaEstado-{dataParaArquivo}.png"
+    casosAntes = f"{path}\\RelatoriosEgraficos\\casosPorDiaEstado-{dataParaArquivo}.png"
     casosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\casosPorDiaEstado-{dataParaArquivo}.png"
-    obitosAntes = f"{path}\\GraficosRelatorios\\obitosPorDiaEstado-{dataParaArquivo}.png"
+    obitosAntes = f"{path}\\RelatoriosEgraficos\\obitosPorDiaEstado-{dataParaArquivo}.png"
     obitosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\obitosPorDiaEstado-{dataParaArquivo}.png"
-    totalDeCasosAntes = f"{path}\\GraficosRelatorios\\totalDeCasosEstado-{dataParaArquivo}.png"
+    totalDeCasosAntes = f"{path}\\RelatoriosEgraficos\\totalDeCasosEstado-{dataParaArquivo}.png"
     totalDeCasosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\totalDeCasosEstado-{dataParaArquivo}.png"
-    dadosComparativosAntes = f"{path}\\GraficosRelatorios\\dadosComparativos-{dataParaArquivo}.png"
+    dadosComparativosAntes = f"{path}\\RelatoriosEgraficos\\dadosComparativos-{dataParaArquivo}.png"
     dadosComparativosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\dadosComparativos-{dataParaArquivo}.png"
-    dadosEstadoAntes = f"{path}\\GraficosRelatorios\\dadosEstado-{dataParaArquivo}.png"
+    dadosEstadoAntes = f"{path}\\RelatoriosEgraficos\\dadosEstado-{dataParaArquivo}.png"
     dadosEstadoDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\dadosEstado-{dataParaArquivo}.png"
-    relatorioAntes = f"{path}\\Relatorios\\relatorio-{dataParaArquivo}.pdf"
+    relatorioAntes = f"{path}\\RelatoriosEgraficos\\relatorio-{dataParaArquivo}.pdf"
     relatorioDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\relatorio-{dataParaArquivo}.pdf"
     diretorioZip = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}.zip"
     diretorioPastaZipar = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}"
@@ -451,11 +452,11 @@ def menuRelatorios(dicRelatorios):
                     indicesMax = np.where(listaCasos == int(maxCasos))
 
                     tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
-                    grafico1(tabela)
-                    grafico2(tabela)
-                    grafico3(tabela)
-                    grafico4(tabela)
-                    grafico5(tabela, listaDatas)
+                    grafico1(tabela, dataRelatorioArquivo)
+                    grafico2(tabela, dataRelatorioArquivo)
+                    grafico3(tabela, dataRelatorioArquivo)
+                    grafico4(tabela, dataRelatorioArquivo)
+                    grafico5(tabela, listaDatas, dataRelatorioArquivo)
 
                     print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
 
@@ -469,15 +470,15 @@ def menuRelatorios(dicRelatorios):
                     pdf = PDF()
                     pdf.add_page()
                     pdf.write_html(f"""<font color="black" size=25><p align=left>Gerais</p></font> <br>
-                                    <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/casosPorDiaEstado-{str(dataRelatorioArquivo)}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
-                                    <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/obitosPorDiaEstado-{str(dataRelatorioArquivo)}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
-                                    <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/totalDeCasosEstado-{str(dataRelatorioArquivo)}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
-                    pdf.image(path+"/GraficosRelatorios/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
+                                    <font size="12" color="#1a0dab"><p align=center><a href="casosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
+                                    <font size="12" color="#1a0dab"><p align=center><a href="obitosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
+                                    <font size="12" color="#1a0dab"><p align=center><a href="totalDeCasosEstado-{str(str(dataRelatorioArquivo))}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
+                    pdf.image(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
                     pdf.write_html(tabelaDatasMin)
                     pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
                     pdf.write_html(tabelaDatasMax)
                     pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
-                    pdf.image(path+"/GraficosRelatorios/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
+                    pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
                     if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
                         pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float((sum(dadosCausasMesPassado)*100)/sum(dadosCausasMesRetrasado))))
                     else:
@@ -486,44 +487,13 @@ def menuRelatorios(dicRelatorios):
                         pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float((sum(dadosObitosMesPassado)*100)/sum(dadosObitosMesRetrasado))))
                     else:
                         pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float((sum(dadosObitosMesRetrasado)*100)/sum(dadosObitosMesPassado))))
-                    pdf.output("relatorio.pdf")
+                    diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
+                    pdf.output(diretorio)
 
                     confirma = input("Deseja enviar email? (S/N): ").upper()
 
                     if confirma == "S":
-                        pyautogui.alert('O programa vai comecar, nao use nada do seu computador!')
-                        pyautogui.press('win')
-                        time.sleep(0.5)
-                        linkGmail = "https://mail.google.com/"
-                        pyperclip.copy(linkGmail)
-                        pyautogui.hotkey('ctrl', 'v')
-                        time.sleep(0.5)
-                        pyautogui.press('enter')
-                        time.sleep(8)
-                        pyautogui.click(int(BDconfiguracoes[6]), int(BDconfiguracoes[7]), clicks=1)
-                        time.sleep(1)
-                        for email in BDusuariosRelatorio:
-                            pyautogui.write(email)
-                            time.sleep(0.5)
-                            pyautogui.press('tab')
-                        time.sleep(0.5)
-                        pyautogui.press('tab')
-                        time.sleep(0.5)
-                        pyautogui.write('Um faturamento ai')
-                        time.sleep(0.5)
-                        pyautogui.press('tab')
-                        time.sleep(0.5)
-                        pyautogui.write(f'o faturamento foi de')
-                        time.sleep(0.5)
-                        pyautogui.press('tab')
-                        time.sleep(0.5)
-                        pyautogui.press('enter')
-
-                        time.sleep(0.5)
-                        pyautogui.hotkey('ctrl', 'w')
-                        time.sleep(1)
-                        pyautogui.hotkey('ctrl', 'w')
-                        pyautogui.alert('Prontinho!')
+                        enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
     
         elif opc == 2:
             data=input("Data a ser consultada: ")
@@ -574,12 +544,12 @@ def criarRelatorioInterface():
                         <font size="12" color="#1a0dab"><p align=center><a href="casosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
                         <font size="12" color="#1a0dab"><p align=center><a href="obitosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
                         <font size="12" color="#1a0dab"><p align=center><a href="totalDeCasosEstado-{str(str(dataRelatorioArquivo))}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
-        pdf.image(path+"/GraficosRelatorios/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
+        pdf.image(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
         pdf.write_html(tabelaDatasMin)
         pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
         pdf.write_html(tabelaDatasMax)
         pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
-        pdf.image(path+"/GraficosRelatorios/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
+        pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
         if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
             pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float((sum(dadosCausasMesPassado)*100)/sum(dadosCausasMesRetrasado))))
         else:
@@ -588,9 +558,32 @@ def criarRelatorioInterface():
             pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float((sum(dadosObitosMesPassado)*100)/sum(dadosObitosMesRetrasado))))
         else:
             pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float((sum(dadosObitosMesRetrasado)*100)/sum(dadosObitosMesPassado))))
-        diretorio = f"{path}\\Relatorios\\relatorio-{dataRelatorioArquivo}.pdf"
+        diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
         pdf.output(diretorio)
         pyautogui.alert('Volte à tela do programa!')
         okcancel = messagebox.askokcancel("Atenção", "Deseja enviar email?")
         if okcancel == True:
             enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
+            return dataAtualF(), "SIM", "NÃO"
+        else:
+            return dataAtualF(), "NÃO", "NÃO"
+        
+
+# ====ALTERA RELATORIO INTERFACE====
+def alteraRelatorioInterface(dic,chave, dado1, dado2):
+    if existeRelatorio(dic,chave):
+        dic[chave]=(dado1, dado2)
+        print("Dados alterados com sucesso!")
+    else:
+        print("Relatorio não cadastrado!")
+
+# =======================INSERE RELATORIO=========================
+def insereRelatorioInterface(dic, data, dado1, dado2):
+    if existeRelatorio(dic, data):
+        okcancel = messagebox.askokcancel("Atenção", "Relatorio ja cadastrado, se proseguir ira atualizar um relatorio ja existente")
+        if okcancel == True:
+            alteraRelatorioInterface(dic,data, dado1, "SIM")
+    else:
+        dic[data]=(dado1, dado2)
+        print(dic)
+        print("Dados inseridos com sucesso!")

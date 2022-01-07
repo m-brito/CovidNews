@@ -136,8 +136,20 @@ class FuncConfiguracoes():
             print("Nenhuma configuracao salva para atualizar!!")
         
 class FuncRelatorio():
+    def mostrarRelatorios(self):
+        self.listaRelatorio.delete(*self.listaRelatorio.get_children())
+        for data in BDrelatorio:
+            tupla = BDrelatorio[data]
+            self.listaRelatorio.insert("", END, values=(data, tupla[0], tupla[1]))
+
     def criaRelatorio(self):
-        criarRelatorioInterface()
+        data, enviou, editou = criarRelatorioInterface()
+        insereRelatorioInterface(BDrelatorio, data, enviou, editou)
+        gravaRelatorios(BDrelatorio)
+        recuperaRelatorios(BDrelatorio)
+        self.mostrarRelatorios()
+
+        print("Dados inseridos com sucesso!")
 
 
 class AplicationRelatorio(FuncRelatorio):
@@ -147,6 +159,7 @@ class AplicationRelatorio(FuncRelatorio):
         self.framesDaTela()
         self.widgetsFrame1()
         self.listaFrame2()
+        self.mostrarRelatorios()
         self.menu()
         self.janelaRelatorios.mainloop()
     
@@ -188,20 +201,20 @@ class AplicationRelatorio(FuncRelatorio):
 
         self.lblData = Label(self.frame1, text='Data', bg='white')
         self.lblData.place(relx=0.01, rely=0.01)
-        self.dataEntry = Entry(self.frame1, bg='#EBEBEB')
+        self.dataEntry = Entry(self.frame1, bg='#EBEBEB', state='disabled')
         self.dataEntry.place(relx=0.01, rely=0.11, relheight=0.15, relwidth=0.3)
     
     def listaFrame2(self):
         self.listaRelatorio = ttk.Treeview(self.frame2, height=4, columns=('col1', 'col2', 'col3'))
         self.listaRelatorio.heading('#0', text='')
         self.listaRelatorio.heading('#1', text='Data')
-        self.listaRelatorio.heading('#2', text='Dado 1')
-        self.listaRelatorio.heading('#3', text='Dado 2')
+        self.listaRelatorio.heading('#2', text='Enviou email')
+        self.listaRelatorio.heading('#3', text='Atualizou')
 
         self.listaRelatorio.column('#0', width=1)
         self.listaRelatorio.column('#1', width=200)
         self.listaRelatorio.column('#2', width=200)
-        self.listaRelatorio.column('#3', width=200)
+        self.listaRelatorio.column('#2', width=200)
 
         self.listaRelatorio.place(relx=0.01, rely=0.1, relwidth=0.95, relheight=0.8)
 
