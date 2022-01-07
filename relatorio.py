@@ -580,9 +580,7 @@ def alteraRelatorioInterface(dic,chave, dado1, dado2):
 # =======================INSERE RELATORIO=========================
 def insereRelatorioInterface(dic, data, dado1, dado2):
     if existeRelatorio(dic, data):
-        okcancel = messagebox.askokcancel("Atenção", "Relatorio ja cadastrado, se proseguir ira atualizar um relatorio ja existente")
-        if okcancel == True:
-            alteraRelatorioInterface(dic,data, dado1, "SIM")
+        alteraRelatorioInterface(dic,data, dado1, "SIM")
     else:
         dic[data]=(dado1, dado2)
         print(dic)

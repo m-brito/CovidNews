@@ -162,12 +162,23 @@ class FuncRelatorio():
             tupla = BDrelatorio[data]
             self.listaRelatorio.insert("", END, values=(data, tupla[0], tupla[1]))
 
-    def criaRelatorio(self):
+    def criandoRelatorio(self):
         data, enviou, editou = criarRelatorioInterface()
         insereRelatorioInterface(BDrelatorio, data, enviou, editou)
         gravaRelatorios(BDrelatorio)
         recuperaRelatorios(BDrelatorio)
         self.mostrarRelatorios()
+
+    def criaRelatorio(self):
+        dataArq = str(dataAtualFArquivo())
+        path = os.getcwd()
+        diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataArq}.pdf"
+        if Path(diretorio).is_file():
+            okcancel = messagebox.askokcancel("Atenção", "Relatorio ja cadastrado, se proseguir ira atualizar um relatorio ja existente")
+            if okcancel == True:
+                self.criandoRelatorio()
+        else:
+            self.criandoRelatorio()
 
         print("Dados inseridos com sucesso!")
     
