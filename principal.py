@@ -223,6 +223,12 @@ class AplicationRelatorio(FuncRelatorio):
         self.lblData.place(relx=0.01, rely=0.01)
         self.dataEntry = Entry(self.frame1, bg='#EBEBEB')
         self.dataEntry.place(relx=0.01, rely=0.11, relheight=0.15, relwidth=0.3)
+
+        self.lblEnviou = Label(self.frame1, text='Enviou: ---', bg='white')
+        self.lblEnviou.place(relx=0.01, rely=0.31)
+
+        self.lblAtualizou = Label(self.frame1, text='Atualizou: ---', bg='white')
+        self.lblAtualizou.place(relx=0.01, rely=0.51)
     
     def listaFrame2(self):
         self.listaRelatorio = ttk.Treeview(self.frame2, height=4, columns=('col1', 'col2', 'col3'))
