@@ -138,6 +138,8 @@ class FuncConfiguracoes():
 class FuncRelatorio():
     def limparTela(self):
         self.dataEntry.delete(0, END)
+        self.lblEnviou['text'] = f'Enviou: ---'
+        self.lblAtualizou['text'] = f'Atualizou: ---'
 
     def variaveis(self):
         self.campoData = self.dataEntry.get()
@@ -148,6 +150,8 @@ class FuncRelatorio():
         for x in self.listaRelatorio.selection():
             col1, col2, col3 = self.listaRelatorio.item(x, 'values')
             self.dataEntry.insert(END, col1)
+        self.lblEnviou['text'] = f'Enviou: {col2}'
+        self.lblAtualizou['text'] = f'Atualizou: {col3}'
 
     def mostrarRelatorios(self):
         self.listaRelatorio.delete(*self.listaRelatorio.get_children())
