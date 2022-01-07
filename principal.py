@@ -163,6 +163,13 @@ class FuncRelatorio():
         self.mostrarRelatorios()
 
         print("Dados inseridos com sucesso!")
+    
+    def deletarRelatorio(self):
+        self.variaveis()
+        removeRelatorioInterface(BDrelatorio, self.campoData)
+        self.mostrarRelatorios()
+        self.limparTela()
+        gravaRelatorios(BDrelatorio)
 
 
 class AplicationRelatorio(FuncRelatorio):
@@ -198,7 +205,7 @@ class AplicationRelatorio(FuncRelatorio):
         self.frame2.place(relx=0.02, rely=0.4, relwidth=0.96, relheight=0.56)
 
     def widgetsFrame1(self):
-        self.btnLimpar = Button(self.frame1, text='Limpar', bg='#EBEBEB')
+        self.btnLimpar = Button(self.frame1, text='Limpar', bg='#EBEBEB', command=self.limparTela)
         self.btnLimpar.place(relx=0.4, rely=0.1, relwidth=0.1, relheight=0.15)
 
         self.btnBuscar = Button(self.frame1, text='Buscar', bg='#EBEBEB')
@@ -207,7 +214,7 @@ class AplicationRelatorio(FuncRelatorio):
         self.btnNovo = Button(self.frame1, text='Criar', bg='#EBEBEB', command=self.criaRelatorio)
         self.btnNovo.place(relx=0.8, rely=0.1, relwidth=0.1, relheight=0.15)
 
-        self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB')
+        self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB', command=self.deletarRelatorio)
         self.btnApagar.place(relx=0.9, rely=0.1, relwidth=0.1, relheight=0.15)
 
         # =========================================================

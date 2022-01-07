@@ -587,3 +587,15 @@ def insereRelatorioInterface(dic, data, dado1, dado2):
         dic[data]=(dado1, dado2)
         print(dic)
         print("Dados inseridos com sucesso!")
+    
+# ====REMOVE UM RELATORIO INTERFACE====
+def removeRelatorioInterface(dic,chave):
+    if existeRelatorio(dic,chave):
+        okcancel = messagebox.askokcancel("Atenção", "Tem certeza que deseja excluir?")
+        if okcancel == True:
+            del dic[chave]
+            print("Dados apagados com sucesso!")
+        else:
+            print("Exclusão cancelada!")
+    else:
+        print("Relatorio não cadastrado!")
