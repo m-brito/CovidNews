@@ -136,6 +136,19 @@ class FuncConfiguracoes():
             print("Nenhuma configuracao salva para atualizar!!")
         
 class FuncRelatorio():
+    def limparTela(self):
+        self.dataEntry.delete(0, END)
+
+    def variaveis(self):
+        self.campoData = self.dataEntry.get()
+
+    def duploClique(self, event):
+        self.limparTela()
+        self.listaRelatorio.selection()
+        for x in self.listaRelatorio.selection():
+            col1, col2, col3 = self.listaRelatorio.item(x, 'values')
+            self.dataEntry.insert(END, col1)
+
     def mostrarRelatorios(self):
         self.listaRelatorio.delete(*self.listaRelatorio.get_children())
         for data in BDrelatorio:
@@ -201,7 +214,7 @@ class AplicationRelatorio(FuncRelatorio):
 
         self.lblData = Label(self.frame1, text='Data', bg='white')
         self.lblData.place(relx=0.01, rely=0.01)
-        self.dataEntry = Entry(self.frame1, bg='#EBEBEB', state='disabled')
+        self.dataEntry = Entry(self.frame1, bg='#EBEBEB')
         self.dataEntry.place(relx=0.01, rely=0.11, relheight=0.15, relwidth=0.3)
     
     def listaFrame2(self):
@@ -221,7 +234,7 @@ class AplicationRelatorio(FuncRelatorio):
         self.scrollLista = Scrollbar(self.frame2, orient='vertical')
         self.listaRelatorio.configure(yscroll=self.scrollLista.set)
         self.scrollLista.place(relx=0.96, rely=0.1, relwidth=0.04, relheight=0.8)
-        # self.listaRelatorio.bind('<Double-1>', self.duploClique)
+        self.listaRelatorio.bind('<Double-1>', self.duploClique)
 
     def telaConfiguracoes(self):
         self.janelaRelatorios.destroy()
