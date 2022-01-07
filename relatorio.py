@@ -22,6 +22,7 @@ import numpy as np
 import matplotlib.cbook as cbook
 from fpdf import FPDF, HTMLMixin
 from datetime import datetime, timedelta
+import shutil
 import zipfile
 
 BDconfiguracoes = recuperaConfiguracoes()
@@ -146,11 +147,11 @@ def baixarArquivos():
     pyautogui.alert('O programa vai comecar, nao use nada do seu computador!')
 
     pyautogui.press('win')
-    time.sleep(0.5)
+    time.sleep(1)
     link = "https://drive.google.com/drive/u/0/folders/1dSPGvocU1Tp-KobogpWfCBJF8QXEcSCY"
     pyperclip.copy(link)
     pyautogui.hotkey('ctrl', 'v')
-    time.sleep(0.5)
+    time.sleep(1)
     pyautogui.press('enter')
     time.sleep(5)
     pyautogui.click(int(BDconfiguracoes[0]), int(BDconfiguracoes[1]), clicks=1)
@@ -167,32 +168,33 @@ def baixarArquivos():
     time.sleep(5)
     # pyautogui.hotkey('ctrl', 'w')
     time.sleep(2)
+    pyautogui.hotkey('ctrl', 'w')
 
-def grafico1(tabela):
+def grafico1(tabela, dataRelatorioArquivo):
     plt.plot(tabela["Data"], tabela["Total de casos"], label="Total")
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/totalDeCasosEstado-"+dataAtualFArquivo()+".png")
+    plt.savefig(path+"/GraficosRelatorios/totalDeCasosEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
-def grafico2(tabela):
+def grafico2(tabela, dataRelatorioArquivo):
     plt.plot(tabela["Data"], tabela["Casos por dia"], label="Casos")
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/casosPorDiaEstado-"+dataAtualFArquivo()+".png")
+    plt.savefig(path+"/GraficosRelatorios/casosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
-def grafico3(tabela):
+def grafico3(tabela, dataRelatorioArquivo):
     plt.plot(tabela["Data"], tabela["Óbitos por dia"], label="Óbitos")
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/obitosPorDiaEstado-"+dataAtualFArquivo()+".png")
+    plt.savefig(path+"/GraficosRelatorios/obitosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
-def grafico4(tabela):
+def grafico4(tabela, dataRelatorioArquivo):
     plt.plot(tabela["Data"], tabela["Total de casos"], label="Total")
     plt.plot(tabela["Data"], tabela["Casos por dia"], label="Casos")
     plt.plot(tabela["Data"], tabela["Óbitos por dia"], label="Óbitos")
@@ -200,10 +202,10 @@ def grafico4(tabela):
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
-    plt.savefig(path+"/GraficosRelatorios/dadosEstado-"+dataAtualFArquivo()+".png")
+    plt.savefig(path+"/GraficosRelatorios/dadosEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
-def grafico5(tabela, listaDatas):
+def grafico5(tabela, listaDatas, dataRelatorioArquivo):
     mesPassado = int(mesAtual())
     mesRetrasado = int(mesAtual())
     if mesPassado == 2:
@@ -254,7 +256,7 @@ def grafico5(tabela, listaDatas):
 
     fig.tight_layout()
 
-    plt.savefig(path+"/GraficosRelatorios/dadosComparativos-"+dataAtualFArquivo()+".png")
+    plt.savefig(path+"/GraficosRelatorios/dadosComparativos-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
 def gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos):
@@ -316,6 +318,87 @@ def gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos):
     """
     return tabelaDatasMin, tabelaDatasMax
 
+def enviarRelatorioEmail(dataParaArquivo, dataFormatada):
+    diretorio = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}"
+    os.makedirs(diretorio)
+    casosAntes = f"{path}\\GraficosRelatorios\\casosPorDiaEstado-{dataParaArquivo}.png"
+    casosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\casosPorDiaEstado-{dataParaArquivo}.png"
+    obitosAntes = f"{path}\\GraficosRelatorios\\obitosPorDiaEstado-{dataParaArquivo}.png"
+    obitosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\obitosPorDiaEstado-{dataParaArquivo}.png"
+    totalDeCasosAntes = f"{path}\\GraficosRelatorios\\totalDeCasosEstado-{dataParaArquivo}.png"
+    totalDeCasosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\totalDeCasosEstado-{dataParaArquivo}.png"
+    dadosComparativosAntes = f"{path}\\GraficosRelatorios\\dadosComparativos-{dataParaArquivo}.png"
+    dadosComparativosDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\dadosComparativos-{dataParaArquivo}.png"
+    dadosEstadoAntes = f"{path}\\GraficosRelatorios\\dadosEstado-{dataParaArquivo}.png"
+    dadosEstadoDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\dadosEstado-{dataParaArquivo}.png"
+    relatorioAntes = f"{path}\\Relatorios\\relatorio-{dataParaArquivo}.pdf"
+    relatorioDestino = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}\\relatorio-{dataParaArquivo}.pdf"
+    diretorioZip = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}.zip"
+    diretorioPastaZipar = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}"
+    shutil.copy(casosAntes, casosDestino)
+    shutil.copy(obitosAntes, obitosDestino)
+    shutil.copy(totalDeCasosAntes, totalDeCasosDestino)
+    shutil.copy(dadosComparativosAntes, dadosComparativosDestino)
+    shutil.copy(dadosEstadoAntes, dadosEstadoDestino)
+    shutil.copy(relatorioAntes, relatorioDestino)
+
+    zip = zipfile.ZipFile(diretorioZip, 'w')
+    for folder, subfolders, files in os.walk(diretorioPastaZipar):
+        for file in files:
+            zip.write(f"./RelatorioEnviar/relatorio-{str(dataParaArquivo)}/{file}", compress_type = zipfile.ZIP_DEFLATED)
+    zip.close()
+    pyautogui.alert('O programa vai comecar, nao use nada do seu computador!')
+    pyautogui.press('win')
+    time.sleep(2)
+    linkGmail = "https://mail.google.com/"
+    pyperclip.copy(linkGmail)
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(1)
+    pyautogui.press('enter')
+    time.sleep(8)
+    pyautogui.click(int(BDconfiguracoes[6]), int(BDconfiguracoes[7]), clicks=1)
+    time.sleep(1)
+    for email in BDusuariosRelatorio:
+        pyautogui.write(email)
+        time.sleep(0.5)
+        pyautogui.press('tab')
+    time.sleep(0.5)
+    pyautogui.press('tab')
+    time.sleep(0.5)
+    sobre = f'Relatório do dia {dataFormatada}'
+    pyperclip.copy(sobre)
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(0.5)
+    pyautogui.press('tab')
+    time.sleep(0.5)
+    conteudo = f'Olá, boa tarde!'
+    pyperclip.copy(conteudo)
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(0.5)
+    pyautogui.press('tab')
+    time.sleep(0.5)
+    pyautogui.press('tab')
+    time.sleep(0.5)
+    pyautogui.press('tab')
+    time.sleep(0.5)
+    pyautogui.press('enter')
+    time.sleep(2.5)
+    diretorioRelatorioZip = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}.zip"
+    pyperclip.copy(diretorioRelatorioZip)
+    pyautogui.hotkey('ctrl', 'v')
+    time.sleep(1)
+    pyautogui.press('enter')
+    time.sleep(1)
+    pyautogui.press('tab')
+    time.sleep(1)
+    pyautogui.press('enter')
+
+    time.sleep(0.5)
+    pyautogui.hotkey('ctrl', 'w')
+    shutil.rmtree(diretorioPastaZipar)
+    os.remove(diretorioRelatorioZip)
+    pyautogui.alert('Prontinho!')
+
 class PDF(FPDF, HTMLMixin):
     pass
     def header(self):
@@ -344,6 +427,7 @@ def menuRelatorios(dicRelatorios):
         opc = int( input("Digite uma opção: ") )
 
         if opc ==1:
+            dataRelatorioArquivo = dataAtualFArquivo()
             BDconfiguracoes = recuperaConfiguracoes()
             recuperaUsuarios(BDusuariosRelatorio)
             confirma = input("Voce ja esta com o programa configurado? (S/N): ").upper()
@@ -353,43 +437,93 @@ def menuRelatorios(dicRelatorios):
                 print("2 - No menu principal de execucao va em 'Gerenciar configuracoes'")
                 print("3 - Siga os passos explicados no pdf!!!")
             elif confirma == "S":
-                faturamento = baixarArquivos()
+                if len(BDconfiguracoes) > 9:
+                    baixarArquivos()
+                    
+                    tabela = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-estado.xlsx")
+                    tabela3 = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx")
+                    listaDatas = list(tabela["Data"])
+                    listaCasos = list(tabela["Casos por dia"])
+                    listaCasos = np.array(listaCasos)
+                    minCasos = tabela["Casos por dia"].min()
+                    maxCasos = tabela["Casos por dia"].max()
+                    indicesMin = np.where(listaCasos == int(minCasos))
+                    indicesMax = np.where(listaCasos == int(maxCasos))
 
-                confirma = input("Deseja enviar email? (S/N): ").upper()
+                    tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
+                    grafico1(tabela)
+                    grafico2(tabela)
+                    grafico3(tabela)
+                    grafico4(tabela)
+                    grafico5(tabela, listaDatas)
 
-                if confirma == "S":
-                    pyautogui.alert('O programa vai comecar, nao use nada do seu computador!')
-                    pyautogui.press('win')
-                    time.sleep(0.5)
-                    linkGmail = "https://mail.google.com/"
-                    pyperclip.copy(linkGmail)
-                    pyautogui.hotkey('ctrl', 'v')
-                    time.sleep(0.5)
-                    pyautogui.press('enter')
-                    time.sleep(8)
-                    pyautogui.click(int(BDconfiguracoes[6]), int(BDconfiguracoes[7]), clicks=1)
-                    time.sleep(1)
-                    for email in BDusuariosRelatorio:
-                        pyautogui.write(email)
+                    print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
+
+                    totalE = tabela["Óbitos por dia"].sum()
+                    cidade = list(tabela3["Município"]).index("São Carlos")
+                    totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
+                    print(totalE, totalM, list(tabela3["Município"])[cidade])
+
+                    print("Porcentagem de casos da cidade {} comparado ao total do estado: {:.2f}%".format(list(tabela3["Município"])[cidade], (totalM*100)/totalE))
+
+                    pdf = PDF()
+                    pdf.add_page()
+                    pdf.write_html(f"""<font color="black" size=25><p align=left>Gerais</p></font> <br>
+                                    <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/casosPorDiaEstado-{str(dataRelatorioArquivo)}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
+                                    <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/obitosPorDiaEstado-{str(dataRelatorioArquivo)}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
+                                    <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/totalDeCasosEstado-{str(dataRelatorioArquivo)}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
+                    pdf.image(path+"/GraficosRelatorios/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
+                    pdf.write_html(tabelaDatasMin)
+                    pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
+                    pdf.write_html(tabelaDatasMax)
+                    pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
+                    pdf.image(path+"/GraficosRelatorios/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
+                    if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
+                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float((sum(dadosCausasMesPassado)*100)/sum(dadosCausasMesRetrasado))))
+                    else:
+                        pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float((sum(dadosCausasMesRetrasado)*100)/sum(dadosCausasMesPassado))))
+                    if sum(dadosObitosMesRetrasado) > sum(dadosObitosMesPassado):
+                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float((sum(dadosObitosMesPassado)*100)/sum(dadosObitosMesRetrasado))))
+                    else:
+                        pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float((sum(dadosObitosMesRetrasado)*100)/sum(dadosObitosMesPassado))))
+                    pdf.output("relatorio.pdf")
+
+                    confirma = input("Deseja enviar email? (S/N): ").upper()
+
+                    if confirma == "S":
+                        pyautogui.alert('O programa vai comecar, nao use nada do seu computador!')
+                        pyautogui.press('win')
+                        time.sleep(0.5)
+                        linkGmail = "https://mail.google.com/"
+                        pyperclip.copy(linkGmail)
+                        pyautogui.hotkey('ctrl', 'v')
+                        time.sleep(0.5)
+                        pyautogui.press('enter')
+                        time.sleep(8)
+                        pyautogui.click(int(BDconfiguracoes[6]), int(BDconfiguracoes[7]), clicks=1)
+                        time.sleep(1)
+                        for email in BDusuariosRelatorio:
+                            pyautogui.write(email)
+                            time.sleep(0.5)
+                            pyautogui.press('tab')
                         time.sleep(0.5)
                         pyautogui.press('tab')
-                    time.sleep(0.5)
-                    pyautogui.press('tab')
-                    time.sleep(0.5)
-                    pyautogui.write('Um faturamento ai')
-                    time.sleep(0.5)
-                    pyautogui.press('tab')
-                    time.sleep(0.5)
-                    pyautogui.write(f'o faturamento foi de: {faturamento}')
-                    time.sleep(0.5)
-                    pyautogui.press('tab')
-                    time.sleep(0.5)
-                    pyautogui.press('enter')
-                    time.sleep(0.5)
-                    pyautogui.alert('Prontinho!')
-                    pyautogui.hotkey('ctrl', 'w')
-                    time.sleep(1)
-                    pyautogui.hotkey('ctrl', 'w')
+                        time.sleep(0.5)
+                        pyautogui.write('Um faturamento ai')
+                        time.sleep(0.5)
+                        pyautogui.press('tab')
+                        time.sleep(0.5)
+                        pyautogui.write(f'o faturamento foi de')
+                        time.sleep(0.5)
+                        pyautogui.press('tab')
+                        time.sleep(0.5)
+                        pyautogui.press('enter')
+
+                        time.sleep(0.5)
+                        pyautogui.hotkey('ctrl', 'w')
+                        time.sleep(1)
+                        pyautogui.hotkey('ctrl', 'w')
+                        pyautogui.alert('Prontinho!')
     
         elif opc == 2:
             data=input("Data a ser consultada: ")
@@ -402,6 +536,7 @@ def menuRelatorios(dicRelatorios):
 # =====================================================================
 
 def criarRelatorioInterface():
+    dataRelatorioArquivo = dataAtualFArquivo()
     BDconfiguracoes = recuperaConfiguracoes()
     recuperaUsuarios(BDusuariosRelatorio)
     if len(BDconfiguracoes) > 9:
@@ -418,11 +553,11 @@ def criarRelatorioInterface():
         indicesMax = np.where(listaCasos == int(maxCasos))
 
         tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
-        grafico1(tabela)
-        grafico2(tabela)
-        grafico3(tabela)
-        grafico4(tabela)
-        grafico5(tabela, listaDatas)
+        grafico1(tabela, dataRelatorioArquivo)
+        grafico2(tabela, dataRelatorioArquivo)
+        grafico3(tabela, dataRelatorioArquivo)
+        grafico4(tabela, dataRelatorioArquivo)
+        grafico5(tabela, listaDatas, dataRelatorioArquivo)
 
         print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
 
@@ -436,15 +571,15 @@ def criarRelatorioInterface():
         pdf = PDF()
         pdf.add_page()
         pdf.write_html(f"""<font color="black" size=25><p align=left>Gerais</p></font> <br>
-                        <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/casosPorDiaEstado-{dataAtualFArquivo()}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
-                        <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/obitosPorDiaEstado-{dataAtualFArquivo()}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
-                        <font size="12" color="#1a0dab"><p align=center><a href="{path}/GraficosRelatorios/totalDeCasosEstado-{dataAtualFArquivo()}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
-        pdf.image(path+"/GraficosRelatorios/dadosEstado-"+dataAtualFArquivo()+".png", h=100, w=200, x=10)
+                        <font size="12" color="#1a0dab"><p align=center><a href="casosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
+                        <font size="12" color="#1a0dab"><p align=center><a href="obitosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
+                        <font size="12" color="#1a0dab"><p align=center><a href="totalDeCasosEstado-{str(str(dataRelatorioArquivo))}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
+        pdf.image(path+"/GraficosRelatorios/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
         pdf.write_html(tabelaDatasMin)
         pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
         pdf.write_html(tabelaDatasMax)
         pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
-        pdf.image(path+"/GraficosRelatorios/dadosComparativos-"+dataAtualFArquivo()+".png", h=100, w=180, x=10)
+        pdf.image(path+"/GraficosRelatorios/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
         if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
             pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float((sum(dadosCausasMesPassado)*100)/sum(dadosCausasMesRetrasado))))
         else:
@@ -453,4 +588,9 @@ def criarRelatorioInterface():
             pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float((sum(dadosObitosMesPassado)*100)/sum(dadosObitosMesRetrasado))))
         else:
             pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float((sum(dadosObitosMesRetrasado)*100)/sum(dadosObitosMesPassado))))
-        pdf.output("relatorio.pdf")
+        diretorio = f"{path}\\Relatorios\\relatorio-{dataRelatorioArquivo}.pdf"
+        pdf.output(diretorio)
+        pyautogui.alert('Volte à tela do programa!')
+        okcancel = messagebox.askokcancel("Atenção", "Deseja enviar email?")
+        if okcancel == True:
+            enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
