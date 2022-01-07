@@ -217,6 +217,9 @@ class AplicationRelatorio(FuncRelatorio):
         self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB', command=self.deletarRelatorio)
         self.btnApagar.place(relx=0.9, rely=0.1, relwidth=0.1, relheight=0.15)
 
+        self.btnAbrir = Button(self.frame1, text='Abrir', bg='#EBEBEB')
+        self.btnAbrir.place(relx=0.9, rely=0.28, relwidth=0.1, relheight=0.15)
+
         # =========================================================
 
         self.lblData = Label(self.frame1, text='Data', bg='white')
