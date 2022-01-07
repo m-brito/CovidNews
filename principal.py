@@ -198,6 +198,23 @@ class FuncRelatorio():
         else:
             print("O arquivo não existe!!!")
 
+    def enviarRelatorio(self):
+        self.variaveis()
+        data = str(self.campoData)
+        dataArq = str(self.campoData).replace('/', '-')
+        path = os.getcwd()
+        diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataArq}.pdf"
+        if Path(diretorio).is_file():
+            enviarRelatorioEmail(dataArq, data)
+            respData, respEnviou, respAtualizou = mostraRelatorioInterface(BDrelatorio, data)
+            alteraRelatorioInterface(BDrelatorio, respData, "SIM", respAtualizou)
+            gravaRelatorios(BDrelatorio)
+            recuperaRelatorios(BDrelatorio)
+            self.mostrarRelatorios()
+            print("Relatorio enviado com sucesso")
+        else:
+            print("O arquivo não existe!!!")
+
 
 class AplicationRelatorio(FuncRelatorio):
     def __init__(self):
@@ -246,6 +263,9 @@ class AplicationRelatorio(FuncRelatorio):
 
         self.btnAbrir = Button(self.frame1, text='Abrir', bg='#EBEBEB', command=self.abrirRelatorio)
         self.btnAbrir.place(relx=0.9, rely=0.28, relwidth=0.1, relheight=0.15)
+
+        self.btnEnviar = Button(self.frame1, text='Enviar', bg='#EBEBEB', command=self.enviarRelatorio)
+        self.btnEnviar.place(relx=0.8, rely=0.28, relwidth=0.1, relheight=0.15)
 
         # =========================================================
 
