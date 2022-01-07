@@ -599,3 +599,12 @@ def removeRelatorioInterface(dic,chave):
             print("Exclusão cancelada!")
     else:
         print("Relatorio não cadastrado!")
+
+# ====EXIBE UM RELATORIO INTERFACE====
+def mostraRelatorioInterface(dic,chave):
+    if existeRelatorio(dic,chave):
+        dados = dic[chave]
+        return chave, dados[0], dados[1]
+    else:
+        print("Relatorio não cadastrada!")
+        return False, False, False

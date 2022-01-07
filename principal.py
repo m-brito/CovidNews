@@ -138,7 +138,7 @@ class FuncConfiguracoes():
 class FuncRelatorio():
     def limparTela(self):
         self.dataEntry.delete(0, END)
-        self.lblEnviou['text'] = f'Enviou: ---'
+        self.lblEnviou['text'] = f'Enviou email: ---'
         self.lblAtualizou['text'] = f'Atualizou: ---'
 
     def variaveis(self):
@@ -150,7 +150,7 @@ class FuncRelatorio():
         for x in self.listaRelatorio.selection():
             col1, col2, col3 = self.listaRelatorio.item(x, 'values')
             self.dataEntry.insert(END, col1)
-        self.lblEnviou['text'] = f'Enviou: {col2}'
+        self.lblEnviou['text'] = f'Enviou email: {col2}'
         self.lblAtualizou['text'] = f'Atualizou: {col3}'
 
     def mostrarRelatorios(self):
@@ -174,6 +174,16 @@ class FuncRelatorio():
         self.mostrarRelatorios()
         self.limparTela()
         gravaRelatorios(BDrelatorio)
+    
+    def buscarRelatorio(self):
+        self.variaveis()
+        respData, respEnviou, respAtualizou = mostraRelatorioInterface(BDrelatorio, self.campoData)
+        self.limparTela()
+        self.mostrarRelatorios()
+        if respData != False and respEnviou != False and respAtualizou != False:
+            self.dataEntry.insert(END, respData)
+            self.lblEnviou['text'] = f'Enviou email: {respEnviou}'
+            self.lblAtualizou['text'] = f'Atualizou: {respAtualizou}'
 
 
 class AplicationRelatorio(FuncRelatorio):
@@ -212,7 +222,7 @@ class AplicationRelatorio(FuncRelatorio):
         self.btnLimpar = Button(self.frame1, text='Limpar', bg='#EBEBEB', command=self.limparTela)
         self.btnLimpar.place(relx=0.4, rely=0.1, relwidth=0.1, relheight=0.15)
 
-        self.btnBuscar = Button(self.frame1, text='Buscar', bg='#EBEBEB')
+        self.btnBuscar = Button(self.frame1, text='Buscar', bg='#EBEBEB', command=self.buscarRelatorio)
         self.btnBuscar.place(relx=0.5, rely=0.1, relwidth=0.1, relheight=0.15)
 
         self.btnNovo = Button(self.frame1, text='Criar', bg='#EBEBEB', command=self.criaRelatorio)
@@ -231,7 +241,7 @@ class AplicationRelatorio(FuncRelatorio):
         self.dataEntry = Entry(self.frame1, bg='#EBEBEB')
         self.dataEntry.place(relx=0.01, rely=0.11, relheight=0.15, relwidth=0.3)
 
-        self.lblEnviou = Label(self.frame1, text='Enviou: ---', bg='white')
+        self.lblEnviou = Label(self.frame1, text='Enviou email: ---', bg='white')
         self.lblEnviou.place(relx=0.01, rely=0.31)
 
         self.lblAtualizou = Label(self.frame1, text='Atualizou: ---', bg='white')
