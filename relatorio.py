@@ -237,8 +237,8 @@ def grafico5(tabela, listaDatas, dataRelatorioArquivo):
     retrasado = [sum(dadosCausasMesRetrasado), sum(dadosObitosMesRetrasado)]
     passado = [sum(dadosCausasMesPassado), sum(dadosObitosMesPassado)]
 
-    x = np.arange(len(labels))  # the label locations
-    width = 0.35  # the width of the bars
+    x = np.arange(len(labels))
+    width = 0.35
 
     fig, ax = plt.subplots()
     rects1 = ax.bar(x - width/2, retrasado, width, label='Mês retrasado')
@@ -411,11 +411,57 @@ class PDF(FPDF, HTMLMixin):
         self.set_y(-15)
         self.set_font("helvetica", "I", 10)
         self.cell(0, 10, f"Página {self.page_no()}/{{nb}} - Maurício Brito Teixeira", 0, 0, "C")
+class PDFMunicipios(FPDF, HTMLMixin):
+    pass
+    def header(self):
+        dt = dataAtualF()
+        self.image("header.png", x=0, y=0, alt_text="Cabecalho")
+        self.write_html("""<br><br><br><br><br><br><br><br>
+            <font color="black" size=35><p align=center>Municípios do Estado <br><br> de São Paulo</p></font>
+            <br><br><br>""")
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font("helvetica", "I", 10)
+        self.cell(0, 10, f"Página {self.page_no()}/{{nb}} - Maurício Brito Teixeira", 0, 0, "C")
+
+def gerarPdfMunicipios():
+    tabela3 = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx")
+
+    tabela = """
+        <table width="50%" border="1">
+            <thead>
+                <tr>
+                <th width="20%">#</th>
+                <th width="80%">Município</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+
+    for indice in range(len(list(tabela3["Município"]))):
+        tabela+="""
+            <tr>
+                <td align=center>{}</td>
+                <td align=center>{}</td>
+            </tr>
+        """.format(indice+1, list(tabela3["Município"])[indice])
+    
+    tabela+="""
+            </tbody>
+        </table>
+    """
+
+    pdf = PDFMunicipios()
+    pdf.add_page()
+    pdf.write_html(tabela)
+    pdf.output("Municipios de SP.pdf")
 
 # ====Menu de relatorios====
 def menuRelatorios(dicRelatorios):
     opc = 1
     while (opc != 6):
+
         print("\nGerenciamento de relatorios:\n")
         print("1 - Criar relatorio de hoje (Forma automatica)!")
         print("2 - Mostra um relatorio")
@@ -439,10 +485,16 @@ def menuRelatorios(dicRelatorios):
                 print("3 - Siga os passos explicados no pdf!!!")
             elif confirma == "S":
                 if len(BDconfiguracoes) > 9:
-                    # baixarArquivos()
+                    baixarArquivos()
                     
                     tabela = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-estado.xlsx")
                     tabela3 = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx")
+
+                    # string  = ""
+                    # for mu in list(tabela3["Município"]):
+                    #     string += f'"{mu}", '
+                    # print(string)
+
                     listaDatas = list(tabela["Data"])
                     listaCasos = list(tabela["Casos por dia"])
                     listaCasos = np.array(listaCasos)

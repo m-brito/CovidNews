@@ -1,2 +1,3 @@
-britomauricio2003@gmail.com;Mauricio
-bmauricio524@gmail.com;Ci
+britomauricio2003@gmail.com;Mauricio;São Carlos
+bmauricio524@gmail.com;Ci;São Paulo
+redelmm@gmail.com;Rede LMM;Ibaté

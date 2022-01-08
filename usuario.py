@@ -12,12 +12,13 @@ def existeUsuario(dic,chave):
 # ====Insere usuario====
 def insereUsuario(dic):
     email = input("Digite o email:")
+    municipio = input("Digite o municipio:")
     if existeUsuario(dic, email):
         print("Usuario já cadastrado!")
         pausa()
     else:
         nome = input("Digite o nome: ")
-        dic[email]=(nome)
+        dic[email]=(nome, municipio)
         print("Dados inseridos com sucesso!")
         pausa()
 
@@ -25,8 +26,9 @@ def insereUsuario(dic):
 def mostraUsuario(dic,chave):
     if existeUsuario(dic,chave):
         dados = dic[chave]
-        print(f"Nome: {dados}")
+        print(f"Nome: {dados[0]}")
         print(f"Email: {chave}")
+        print(f"Município: {dados[1]}")
     else:
         print("Usuario não cadastrada!")
 
@@ -37,7 +39,8 @@ def alteraUsuario(dic,chave):
         confirma = input("Tem certeza que deseja alterá-lo? (S/N): ").upper()
         if confirma == 'S':
             nome = input("Digite o nome: ")
-            dic[chave]=(nome)
+            municipio = input("Digite o município: ")
+            dic[chave]=(nome, municipio)
             print("Dados alterados com sucesso!")
             pausa()
         else:
@@ -66,10 +69,10 @@ def removeUsuario(dic,chave):
 # ====Mostra todos usuarios====
 def mostraTodosUsuarios(dic):
     print("Relatório: Todas os usuarios\n")
-    print("EMAIL - NOME\n")
+    print("EMAIL - NOME - MUNICÍPIO\n")
     for email in dic:
         tupla = dic[email]
-        linha = email + " - " + tupla
+        linha = email + " - " + tupla[0] + " - " + tupla[1]
         print(linha)
     print("")
     pausa()
@@ -79,7 +82,7 @@ def gravaUsuarios(dic):
     arq = open("usuarios.txt", "w")
     for email in dic:
         tupla = dic[email]
-        linha = email+";"+tupla+"\n"
+        linha = email+";"+tupla[0]+";"+tupla[1]+"\n"
         arq.write(linha)
     arq.close()
 
@@ -92,7 +95,9 @@ def recuperaUsuarios(dic):
             lista = linha.split(";")
             nome = lista[1]
             email = lista[0]
-            dic[email] = (nome)
+            municipio = lista[2]
+            dic[email] = (nome, municipio)
+            # encode("windows-1252").decode("utf-8")
 
 # ====Menu de usuarios====
 def menuUsuarios(dicUsuarios):
@@ -131,11 +136,11 @@ def menuUsuarios(dicUsuarios):
             gravaUsuarios(dicUsuarios)
 
 # ====Insere usuario INTERFACE====
-def insereUsuarioInterface(dic, email, nome):
+def insereUsuarioInterface(dic, email, nome, municipio):
     if existeUsuario(dic, email):
         print("Usuario já cadastrado!")
     else:
-        dic[email]=(nome)
+        dic[email]=(nome, municipio)
         print("Dados inseridos com sucesso!")
 
 # ====Remove um usuario INTERFACE====
@@ -147,10 +152,10 @@ def removeUsuarioInterface(dic,chave):
         print("Pessoa não cadastrada!")
 
 # ====Altera usuario INTERFACE====
-def alteraUsuarioInterface(dic, chave, nome):
+def alteraUsuarioInterface(dic, chave, nome, municipio):
     if existeUsuario(dic,chave):
         mostraUsuario(dic,chave)
-        dic[chave]=(nome)
+        dic[chave]=(nome, municipio)
         print("Dados alterados com sucesso!")
     else:
         print("Usuario não cadastrado!")
@@ -159,6 +164,6 @@ def alteraUsuarioInterface(dic, chave, nome):
 def mostraUsuarioInterface(dic,chave):
     if existeUsuario(dic,chave):
         dados = dic[chave]
-        return(dados, chave)
+        return(dados[0], chave, dados[1])
     else:
-        return(False, False)
+        return(False, False, False)

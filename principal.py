@@ -29,17 +29,19 @@ class FuncsUsuarios():
     def limparTela(self):
         self.emailEntry.delete(0, END)
         self.nomeEntry.delete(0, END)
+        self.municipioEntry.delete(0, END)
 
     def variaveis(self):
         self.campoEmail = self.emailEntry.get()
         self.campoNome = self.nomeEntry.get()
+        self.campoMunicipio = self.municipioEntry.get()
 
     def sair(self):
         self.janelaUsuarios.destroy()
 
     def addUsuario(self):
         self.variaveis()
-        insereUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome)
+        insereUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome, self.campoMunicipio)
         self.mostrarUsuarios()
         self.limparTela()
         gravaUsuarios(BDusuarios)
@@ -48,15 +50,16 @@ class FuncsUsuarios():
         self.listaUsuarios.delete(*self.listaUsuarios.get_children())
         for email in BDusuarios:
             tupla = BDusuarios[email]
-            self.listaUsuarios.insert("", END, values=(email, tupla))
+            self.listaUsuarios.insert("", END, values=(email, tupla[0], tupla[1]))
 
     def duploClique(self, event):
         self.limparTela()
         self.listaUsuarios.selection()
         for x in self.listaUsuarios.selection():
-            col1, col2 = self.listaUsuarios.item(x, 'values')
+            col1, col2, col3 = self.listaUsuarios.item(x, 'values')
             self.emailEntry.insert(END, col1)
             self.nomeEntry.insert(END, col2)
+            self.municipioEntry.insert(END, col3)
 
     def deletarUsuario(self):
         self.variaveis()
@@ -67,19 +70,20 @@ class FuncsUsuarios():
 
     def alterarUsuario(self):
         self.variaveis()
-        alteraUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome)
+        alteraUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome, self.campoMunicipio)
         self.mostrarUsuarios()
         self.limparTela()
         gravaUsuarios(BDusuarios)
 
     def buscarUsuario(self):
         self.variaveis()
-        respNome, respEmail = mostraUsuarioInterface(BDusuarios, self.campoEmail)
+        respNome, respEmail, respMunicipio = mostraUsuarioInterface(BDusuarios, self.campoEmail)
         self.limparTela()
         self.mostrarUsuarios()
-        if respNome != False and respEmail != False:
+        if respNome != False and respEmail != False and respMunicipio != False:
             self.emailEntry.insert(END, respEmail)
             self.nomeEntry.insert(END, respNome)
+            self.municipioEntry.insert(END, respMunicipio)
 
 class FuncConfiguracoes():
     def mostrarConfigs(self):
@@ -463,6 +467,9 @@ class AplicationUsuarios(FuncsUsuarios):
         self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB', command=self.deletarUsuario)
         self.btnApagar.place(relx=0.9, rely=0.1, relwidth=0.1, relheight=0.15)
 
+        self.btnVerMunicipios = Button(self.frame1, text='Ver Municipios', bg='#EBEBEB')
+        self.btnVerMunicipios.place(relx=0.85, rely=0.69, relwidth=0.15, relheight=0.15)
+
         # =========================================================
 
         self.lblEmail = Label(self.frame1, text='Email', bg='white')
@@ -471,22 +478,26 @@ class AplicationUsuarios(FuncsUsuarios):
         self.emailEntry.place(relx=0.01, rely=0.11, relheight=0.15, relwidth=0.3)
 
         self.lblNome = Label(self.frame1, text='Nome', bg='white')
-        self.lblNome.place(relx=0.01, rely=0.4)
+        self.lblNome.place(relx=0.01, rely=0.3)
         self.nomeEntry = Entry(self.frame1, bg='#EBEBEB')
-        self.nomeEntry.place(relx=0.01, rely=0.5, relheight=0.15, relwidth=0.989)
+        self.nomeEntry.place(relx=0.01, rely=0.4, relheight=0.15, relwidth=0.989)
 
-        # self.Tipvar = StringVar(self.frame1)
-        # self.TipV = ("")
+        self.lblMunicipio = Label(self.frame1, text='Município', bg='white')
+        self.lblMunicipio.place(relx=0.01, rely=0.6)
+        self.municipioEntry = Entry(self.frame1, bg='#EBEBEB')
+        self.municipioEntry.place(relx=0.01, rely=0.7, relheight=0.15, relwidth=0.829)
 
     def listaFrame2(self):
-        self.listaUsuarios = ttk.Treeview(self.frame2, height=4, columns=('col1', 'col2'))
+        self.listaUsuarios = ttk.Treeview(self.frame2, height=4, columns=('col1', 'col2', 'col3'))
         self.listaUsuarios.heading('#0', text='')
         self.listaUsuarios.heading('#1', text='Email')
         self.listaUsuarios.heading('#2', text='Nome')
+        self.listaUsuarios.heading('#3', text='Município')
 
         self.listaUsuarios.column('#0', width=1)
-        self.listaUsuarios.column('#1', width=350)
-        self.listaUsuarios.column('#2', width=250)
+        self.listaUsuarios.column('#1', width=300)
+        self.listaUsuarios.column('#2', width=150)
+        self.listaUsuarios.column('#3', width=150)
 
         self.listaUsuarios.place(relx=0.01, rely=0.1, relwidth=0.95, relheight=0.8)
 
