@@ -85,6 +85,15 @@ class FuncsUsuarios():
             self.nomeEntry.insert(END, respNome)
             self.municipioEntry.insert(END, respMunicipio)
 
+    def abrirMunicipios(self):
+        self.variaveis()
+        path = os.getcwd()
+        diretorio = f"{path}\\Municipios\\Municipios de SP.pdf"
+        if Path(diretorio).is_file():
+            webbrowser.open(diretorio)
+        else:
+            print("O arquivo não existe!!!")
+
 class FuncConfiguracoes():
     def mostrarConfigs(self):
         BDconfiguracoes = recuperaConfiguracoesInterface()
@@ -467,7 +476,7 @@ class AplicationUsuarios(FuncsUsuarios):
         self.btnApagar = Button(self.frame1, text='Apagar', bg='#EBEBEB', command=self.deletarUsuario)
         self.btnApagar.place(relx=0.9, rely=0.1, relwidth=0.1, relheight=0.15)
 
-        self.btnVerMunicipios = Button(self.frame1, text='Ver Municipios', bg='#EBEBEB')
+        self.btnVerMunicipios = Button(self.frame1, text='Ver Municipios', bg='#EBEBEB', command=self.abrirMunicipios)
         self.btnVerMunicipios.place(relx=0.85, rely=0.69, relwidth=0.15, relheight=0.15)
 
         # =========================================================

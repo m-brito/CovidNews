@@ -426,42 +426,45 @@ class PDFMunicipios(FPDF, HTMLMixin):
         self.cell(0, 10, f"Página {self.page_no()}/{{nb}} - Maurício Brito Teixeira", 0, 0, "C")
 
 def gerarPdfMunicipios():
-    tabela3 = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx")
+    diretorio = r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx"
+    if Path(diretorio).is_file():
+        tabela3 = pd.read_excel(diretorio)
 
-    tabela = """
-        <table width="50%" border="1">
-            <thead>
+        tabela = """
+            <table width="50%" border="1">
+                <thead>
+                    <tr>
+                    <th width="20%">#</th>
+                    <th width="80%">Município</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+
+        for indice in range(len(list(tabela3["Município"]))):
+            tabela+="""
                 <tr>
-                <th width="20%">#</th>
-                <th width="80%">Município</th>
+                    <td align=center>{}</td>
+                    <td align=center>{}</td>
                 </tr>
-            </thead>
-            <tbody>
-    """
-
-    for indice in range(len(list(tabela3["Município"]))):
+            """.format(indice+1, list(tabela3["Município"])[indice])
+        
         tabela+="""
-            <tr>
-                <td align=center>{}</td>
-                <td align=center>{}</td>
-            </tr>
-        """.format(indice+1, list(tabela3["Município"])[indice])
-    
-    tabela+="""
-            </tbody>
-        </table>
-    """
+                </tbody>
+            </table>
+        """
 
-    pdf = PDFMunicipios()
-    pdf.add_page()
-    pdf.write_html(tabela)
-    pdf.output("Municipios de SP.pdf")
+        pdf = PDFMunicipios()
+        pdf.add_page()
+        pdf.write_html(tabela)
+        pdf.output("Municipios de SP.pdf")
+    else:
+        print("O arquivo 'Dados-covid-19-municipios.xlsx' não existe!!!")
 
 # ====Menu de relatorios====
 def menuRelatorios(dicRelatorios):
     opc = 1
     while (opc != 6):
-
         print("\nGerenciamento de relatorios:\n")
         print("1 - Criar relatorio de hoje (Forma automatica)!")
         print("2 - Mostra um relatorio")
