@@ -42,9 +42,14 @@ dadosObitosMesRetrasado = []
 datasMesPassado = []
 dadosCausasMesPassado = []
 dadosObitosMesPassado = []
+dadosCausasAntepenultimoMes = []
+dadosObitosAntepenultimoMes = []
 datasMaxCasos = []
 tabelaDatasMin = """"""
 tabelaDatasMax = """"""
+diretorioDownloads = "C:\\Users\\Windows 10\\Downloads"
+mesesEN = {'jan': (1), 'fev': (2), 'mar': (3), 'abr': (4), 'mai': (5), 'jun': (6), 'jul': (7), 'ago': (8), 'set': (9), 'out': (10), 'nov': (11), 'dez': (12)}
+mesesNE = {'1': ('Janeiro'), '2': ('Fevereiro'), '3': ('Março'), '4': ('Abril'), '5': ('Maio'), '6': ('Junho'), '7': ('Julho'), '8': ('Agosto'), '9': ('Setembro'), '10': ('Outubro'), '11': ('Novembro'), '12': ('Dezembro')}
 # ======================================================================================================
 
 # ====Verifica se relatorio existe====
@@ -137,6 +142,13 @@ def recuperaRelatorios(dic):
             dado1 = lista[1]
             dado2 = lista[2]
             dic[data] = (dado1, dado2)
+        
+def isnumber(value):
+    try:
+         float(value)
+    except ValueError:
+         return False
+    return True
 
 def baixarArquivos():
     BDconfiguracoes = recuperaConfiguracoes()
@@ -169,34 +181,34 @@ def baixarArquivos():
     time.sleep(2)
     pyautogui.hotkey('ctrl', 'w')
 
-def grafico1(tabela, dataRelatorioArquivo):
-    plt.plot(tabela["Data"], tabela["Total de casos"], label="Total")
+def grafico1(tabela, dataRelatorioArquivo, datas):
+    plt.plot(datas, tabela["Total de casos"], label="Total")
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
     plt.savefig(path+"\\RelatoriosEgraficos\\totalDeCasosEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
-def grafico2(tabela, dataRelatorioArquivo):
-    plt.plot(tabela["Data"], tabela["Casos por dia"], label="Casos")
+def grafico2(tabela, dataRelatorioArquivo, datas):
+    plt.plot(datas, tabela["Casos por dia"], label="Casos")
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
     plt.savefig(path+"\\RelatoriosEgraficos\\casosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
-def grafico3(tabela, dataRelatorioArquivo):
-    plt.plot(tabela["Data"], tabela["Óbitos por dia"], label="Óbitos")
+def grafico3(tabela, dataRelatorioArquivo, datas):
+    plt.plot(datas, tabela["Óbitos por dia"], label="Óbitos")
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
     plt.legend(loc="upper left")
     plt.savefig(path+"\\RelatoriosEgraficos\\obitosPorDiaEstado-"+str(dataRelatorioArquivo)+".png")
     plt.close()
 
-def grafico4(tabela, dataRelatorioArquivo):
-    plt.plot(tabela["Data"], tabela["Total de casos"], label="Total")
-    plt.plot(tabela["Data"], tabela["Casos por dia"], label="Casos")
-    plt.plot(tabela["Data"], tabela["Óbitos por dia"], label="Óbitos")
+def grafico4(tabela, dataRelatorioArquivo, datas):
+    plt.plot(datas, tabela["Total de casos"], label="Total")
+    plt.plot(datas, tabela["Casos por dia"], label="Casos")
+    plt.plot(datas, tabela["Óbitos por dia"], label="Óbitos")
     plt.ylim(0, 30000)
     plt.xlabel("Data")
     plt.ylabel("Quantidade")
@@ -205,53 +217,79 @@ def grafico4(tabela, dataRelatorioArquivo):
     plt.close()
 
 def grafico5(tabela, listaDatas, dataRelatorioArquivo):
+    mesHoje = int(mesAtual())
     mesPassado = int(mesAtual())
     mesRetrasado = int(mesAtual())
-    if mesPassado == 2:
-        mesPassado=1
-        mesRetrasado=12
+    antepenultimoMes = int(mesAtual())
+    if mesPassado == 3:
+        mesPassado = 2
+        mesRetrasado = 1
+        antepenultimoMes = 12
+    elif mesPassado == 2:
+        mesPassado = 1
+        mesRetrasado = 12
+        antepenultimoMes = 11
     elif mesPassado == 1:
         mesPassado = 12
         mesRetrasado = 11
+        antepenultimoMes = 10
     else: 
-        mesPassado-=1
-        mesRetrasado-=2
+        mesPassado -= 1
+        mesRetrasado -= 2
+        antepenultimoMes -= 3
     continua = True
     x = int(len(listaDatas))-1
     while continua==True:
-        dataFra = (str(listaDatas[x]).split(' ')[0].split('-'))
-        if int(dataFra[1]) == mesPassado:
-            datasMesPassado.append(tabela["Data"][x])
-            dadosCausasMesPassado.append(int(tabela["Casos por dia"][x]))
-            dadosObitosMesPassado.append(int(tabela["Óbitos por dia"][x]))
-        if int(dataFra[1]) == mesRetrasado:
-            datasMesRetrasado.append(tabela["Data"][x])
-            dadosCausasMesRetrasado.append(int(tabela["Casos por dia"][x]))
-            dadosObitosMesRetrasado.append(int(tabela["Óbitos por dia"][x]))
-        if x==0 or int(dataFra[1]) < mesRetrasado:
-            continua = False
+        dataFra = (str(listaDatas[x]).split('/'))
+        if(isnumber(dataFra[1])==True):
+            dataFra = int(dataFra[1])
+        else:
+            dataFra = int(mesesEN[str(dataFra[1])])
+        if int(dataFra) != mesHoje:
+            if int(dataFra) == mesPassado:
+                datasMesPassado.append(tabela["Data"][x])
+                dadosCausasMesPassado.append(int(tabela["Casos por dia"][x]))
+                dadosObitosMesPassado.append(int(tabela["Óbitos por dia"][x]))
+            if int(dataFra) == mesRetrasado:
+                datasMesRetrasado.append(tabela["Data"][x])
+                dadosCausasMesRetrasado.append(int(tabela["Casos por dia"][x]))
+                dadosObitosMesRetrasado.append(int(tabela["Óbitos por dia"][x]))
+            if int(dataFra) == antepenultimoMes:
+                datasMesRetrasado.append(tabela["Data"][x])
+                dadosCausasAntepenultimoMes.append(int(tabela["Casos por dia"][x]))
+                dadosObitosAntepenultimoMes.append(int(tabela["Óbitos por dia"][x]))
+            if x==0 or int(dataFra) < antepenultimoMes:
+                continua = False
+            else:
+                x-=1
         else:
             x-=1
+        if x==0:
+            continua = False
         
     labels = ['Casos', 'Óbitos']
+    antepenultimo = [sum(dadosCausasAntepenultimoMes), sum(dadosObitosAntepenultimoMes)]
     retrasado = [sum(dadosCausasMesRetrasado), sum(dadosObitosMesRetrasado)]
     passado = [sum(dadosCausasMesPassado), sum(dadosObitosMesPassado)]
 
     x = np.arange(len(labels))
-    width = 0.35
+    width = 0.25
 
     fig, ax = plt.subplots()
-    rects1 = ax.bar(x - width/2, retrasado, width, label='Mês retrasado')
-    rects2 = ax.bar(x + width/2, passado, width, label='Mês passado')
+    print(x - width/2)
+    print(x + width/2)
+    rects1 = ax.bar(x + width/2, antepenultimo, width, label=f'{mesesNE[str(antepenultimoMes)]}')
+    rects2 = ax.bar(x + (width*3)/2, retrasado, width, label=f'{mesesNE[str(mesRetrasado)]}')
+    rects3 = ax.bar(x + (width*5)/2, passado, width, label=f'{mesesNE[str(mesPassado)]}')
 
-    # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Quantidade')
-    ax.set_title('Casos e óbitos - mes retrasado/passado')
-    ax.set_xticks(x, labels)
+    ax.set_title(f'Casos e óbitos - mes {mesesNE[str(antepenultimoMes)]}/{mesesNE[str(mesRetrasado)]}/{mesesNE[str(mesPassado)]}')
+    ax.set_xticks(x+0.25+(0.25/2), labels)
     ax.legend()
 
     ax.bar_label(rects1, padding=3)
     ax.bar_label(rects2, padding=3)
+    ax.bar_label(rects3, padding=3)
 
     fig.tight_layout()
 
@@ -489,14 +527,33 @@ def menuRelatorios(dicRelatorios):
             elif confirma == "S":
                 if len(BDconfiguracoes) > 9:
                     baixarArquivos()
-                    
-                    tabela = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-estado.xlsx")
-                    tabela3 = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx")
+                    tabelinha = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-estado.csv", encoding="ANSI", sep=";")
+                    tabelinha.to_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx", index = None, header=True)
+                    tabelinha3 = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-municipios.csv", encoding="ANSI", sep=";")
+                    tabelinha3.to_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx", index = None, header=True)
 
+                    tabela = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                    tabela3 = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                    
                     # string  = ""
                     # for mu in list(tabela3["Município"]):
                     #     string += f'"{mu}", '
                     # print(string)
+
+                    datas = []
+                    ano = 0
+                    mes = 0
+                    dia = 0
+                    for data in tabela["Data"]:
+                        mes = (str(data).split('/'))
+                        if(isnumber(mes[1])==True):
+                            mes = int(mes[1])
+                        else:
+                            mes = int(mesesEN[str(mes[1])])
+                        dia = int(str(data).split("/")[0])
+                        ano = int(str(data).split("/")[2])
+                        x = datetime(ano, mes, dia)
+                        datas.append(x)
 
                     listaDatas = list(tabela["Data"])
                     listaCasos = list(tabela["Casos por dia"])
@@ -507,20 +564,20 @@ def menuRelatorios(dicRelatorios):
                     indicesMax = np.where(listaCasos == int(maxCasos))
 
                     tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
-                    grafico1(tabela, dataRelatorioArquivo)
-                    grafico2(tabela, dataRelatorioArquivo)
-                    grafico3(tabela, dataRelatorioArquivo)
-                    grafico4(tabela, dataRelatorioArquivo)
+                    grafico1(tabela, dataRelatorioArquivo, datas)
+                    grafico2(tabela, dataRelatorioArquivo, datas)
+                    grafico3(tabela, dataRelatorioArquivo, datas)
+                    grafico4(tabela, dataRelatorioArquivo, datas)
                     grafico5(tabela, listaDatas, dataRelatorioArquivo)
 
-                    print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
+                    # print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
 
                     totalE = tabela["Óbitos por dia"].sum()
                     cidade = list(tabela3["Município"]).index("São Carlos")
                     totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
-                    print(totalE, totalM, list(tabela3["Município"])[cidade])
+                    # print(totalE, totalM, list(tabela3["Município"])[cidade])
 
-                    print("Porcentagem de casos da cidade {} comparado ao total do estado: {:.2f}%".format(list(tabela3["Município"])[cidade], (totalM*100)/totalE))
+                    # print("Porcentagem de casos da cidade {} comparado ao total do estado: {:.2f}%".format(list(tabela3["Município"])[cidade], (totalM*100)/totalE))
 
                     pdf = PDF()
                     pdf.add_page()
@@ -535,13 +592,14 @@ def menuRelatorios(dicRelatorios):
                     pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
                     pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
                     if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
-                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float((sum(dadosCausasMesPassado)*100)/sum(dadosCausasMesRetrasado))))
+                        print(float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado))
+                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado)))
                     else:
-                        pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float((sum(dadosCausasMesRetrasado)*100)/sum(dadosCausasMesPassado))))
+                        pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado))*100)/sum(dadosCausasMesPassado)))
                     if sum(dadosObitosMesRetrasado) > sum(dadosObitosMesPassado):
-                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float((sum(dadosObitosMesPassado)*100)/sum(dadosObitosMesRetrasado))))
+                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
                     else:
-                        pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float((sum(dadosObitosMesRetrasado)*100)/sum(dadosObitosMesPassado))))
+                        pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
                     diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
                     pdf.output(diretorio)
 
@@ -597,9 +655,29 @@ def criarRelatorioInterface():
     recuperaUsuarios(BDusuariosRelatorio)
     if len(BDconfiguracoes) > 9:
         baixarArquivos()
-        
-        tabela = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-estado.xlsx")
-        tabela3 = pd.read_excel(r"C:\Users\Windows 10\Downloads\Dados-covid-19-municipios.xlsx")
+        tabelinha = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-estado.csv", encoding="ANSI", sep=";")
+        tabelinha.to_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx", index = None, header=True)
+        tabelinha3 = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-municipios.csv", encoding="ANSI", sep=";")
+        tabelinha3.to_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx", index = None, header=True)
+
+        tabela = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+        tabela3 = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+
+        datas = []
+        ano = 0
+        mes = 0
+        dia = 0
+        for data in tabela["Data"]:
+            mes = (str(data).split('/'))
+            if(isnumber(mes[1])==True):
+                mes = int(mes[1])
+            else:
+                mes = int(mesesEN[str(mes[1])])
+            dia = int(str(data).split("/")[0])
+            ano = int(str(data).split("/")[2])
+            x = datetime(ano, mes, dia)
+            datas.append(x)
+
         listaDatas = list(tabela["Data"])
         listaCasos = list(tabela["Casos por dia"])
         listaCasos = np.array(listaCasos)
@@ -609,20 +687,20 @@ def criarRelatorioInterface():
         indicesMax = np.where(listaCasos == int(maxCasos))
 
         tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
-        grafico1(tabela, dataRelatorioArquivo)
-        grafico2(tabela, dataRelatorioArquivo)
-        grafico3(tabela, dataRelatorioArquivo)
-        grafico4(tabela, dataRelatorioArquivo)
+        grafico1(tabela, dataRelatorioArquivo, datas)
+        grafico2(tabela, dataRelatorioArquivo, datas)
+        grafico3(tabela, dataRelatorioArquivo, datas)
+        grafico4(tabela, dataRelatorioArquivo, datas)
         grafico5(tabela, listaDatas, dataRelatorioArquivo)
 
-        print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
+        # print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
 
         totalE = tabela["Óbitos por dia"].sum()
         cidade = list(tabela3["Município"]).index("São Carlos")
         totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
-        print(totalE, totalM, list(tabela3["Município"])[cidade])
+        # print(totalE, totalM, list(tabela3["Município"])[cidade])
 
-        print("Porcentagem de casos da cidade {} comparado ao total do estado: {:.2f}%".format(list(tabela3["Município"])[cidade], (totalM*100)/totalE))
+        # print("Porcentagem de casos da cidade {} comparado ao total do estado: {:.2f}%".format(list(tabela3["Município"])[cidade], (totalM*100)/totalE))
 
         pdf = PDF()
         pdf.add_page()
@@ -637,13 +715,14 @@ def criarRelatorioInterface():
         pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
         pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
         if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
-            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float((sum(dadosCausasMesPassado)*100)/sum(dadosCausasMesRetrasado))))
+            print(float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado))
+            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado)))
         else:
-            pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float((sum(dadosCausasMesRetrasado)*100)/sum(dadosCausasMesPassado))))
+            pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado))*100)/sum(dadosCausasMesPassado)))
         if sum(dadosObitosMesRetrasado) > sum(dadosObitosMesPassado):
-            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float((sum(dadosObitosMesPassado)*100)/sum(dadosObitosMesRetrasado))))
+            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
         else:
-            pdf.write_html("<font color='red'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float((sum(dadosObitosMesRetrasado)*100)/sum(dadosObitosMesPassado))))
+            pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
         diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
         pdf.output(diretorio)
         pyautogui.alert('Volte à tela do programa!')
