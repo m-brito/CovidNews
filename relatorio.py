@@ -164,7 +164,7 @@ def baixarArquivos():
     pyautogui.hotkey('ctrl', 'v')
     time.sleep(1)
     pyautogui.press('enter')
-    time.sleep(5)
+    time.sleep(10)
     pyautogui.click(int(BDconfiguracoes[0]), int(BDconfiguracoes[1]), clicks=1)
     time.sleep(1)
     pyautogui.click(int(BDconfiguracoes[2]), int(BDconfiguracoes[3]), clicks=1)
@@ -729,8 +729,16 @@ def criarRelatorioInterface():
         okcancel = messagebox.askokcancel("Atenção", "Deseja enviar email?")
         if okcancel == True:
             enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
             return dataAtualF(), "SIM", "NÃO"
         else:
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
+            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
             return dataAtualF(), "NÃO", "NÃO"
         
 
