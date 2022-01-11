@@ -99,6 +99,9 @@ def recuperaUsuarios(dic):
             dic[email] = (nome, municipio)
             # encode("windows-1252").decode("utf-8")
 
+# def verificaMunicipio(municipio):
+
+
 # ====Menu de usuarios====
 def menuUsuarios(dicUsuarios):
     opc = 0
