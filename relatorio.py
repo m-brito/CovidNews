@@ -30,6 +30,9 @@ import webbrowser
 from pathlib import Path
 import math
 
+import requests
+import json
+
 BDconfiguracoes = recuperaConfiguracoes()
 BDusuariosRelatorio = {}
 recuperaUsuarios(BDusuariosRelatorio)
@@ -170,7 +173,7 @@ def baixarArquivos():
     pyautogui.press('enter')
     time.sleep(10)
     pyautogui.click(int(BDconfiguracoes[0]), int(BDconfiguracoes[1]), clicks=1)
-    time.sleep(1)
+    time.sleep(1) 
     pyautogui.click(int(BDconfiguracoes[2]), int(BDconfiguracoes[3]), clicks=1)
     time.sleep(1)
     pyautogui.click(int(BDconfiguracoes[4]), int(BDconfiguracoes[5]), clicks=1)
@@ -619,7 +622,21 @@ def menuRelatorios(dicRelatorios):
 
                     for user in BDusuariosRelatorio.keys():
                         if BDusuariosRelatorio[user][1] in municipios.keys():
-                            pdf.write_html(f"""<font color="black" size=20><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                            pdf.image("linha.png", h=50, w=180, x=10)
+
+                            url = "https://bing-news-search1.p.rapidapi.com/news/search"
+
+                            querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
+
+                            headers = {
+                                'x-bingapis-sdk': "true",
+                                'x-rapidapi-host': "bing-news-search1.p.rapidapi.com",
+                                'x-rapidapi-key': "2dba171373msh69cb522f708c18bp155cbbjsn8a376a6c365b"
+                                }
+
+                            response = requests.request("GET", url, headers=headers, params=querystring)
+
+                            pdf.write_html(f"""<font color="black" size=35><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
                             totalDeCasos = municipios[BDusuariosRelatorio[user][1]][1]
                             totalDeObitos = municipios[BDusuariosRelatorio[user][1]][2]
                             ptotalM = (totalDeCasos*100)/totalEC
@@ -631,10 +648,35 @@ def menuRelatorios(dicRelatorios):
                             pdf.write_html("""<font color="black" size=10><p align=center>{} equivale à {:.2f}% dos casos do estado de São Paulo({})</p></font> <br>""".format(totalDeCasos, ptotalM, totalEC))
                             pdf.image(path+"/RelatoriosEgraficos/"+f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
                             pdf.write_html(f"""<font color="black" size=10><p align=center>A cada {math.ceil(totalDeCasos/totalDeObitos)} casos de Covid-19 1 morre! (Aproximadamente)</p></font> <br>""")
+
+                            pdf.write_html(f"""<font color="green" size=20><p align=center>Notícias do Covid na cidade de {BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                            
+                            for a in range(0, len(json.loads(response.text)["value"])):
+                                try:
+                                    titulo = json.loads(response.text)["value"][a]["name"]
+                                    url = json.loads(response.text)["value"][a]["url"]
+                                    fonte = json.loads(response.text)["value"][a]["provider"][0]["name"]
+                                    description = json.loads(response.text)["value"][a]["description"]
+                                    imagem = json.loads(response.text)["value"][a]["image"]["thumbnail"]["contentUrl"]
+                                    pdf.image(imagem, h=35, w=35, x=85)
+                                    pdf.write_html(f"""
+                                    <ul><li>{fonte}</li>
+                                        <ol>
+                                            <li>{titulo}</li>
+                                            <li>{description}</li>
+                                            <li><a href='{url}'>Ver notícia</a></li>
+                                        </ol>
+                                    </ul>
+                                    <br><br><br>
+                                    """)
+                                except:
+                                    print("erro!")
+                            
                         else:
                             print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
 
                     diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
+                    pdf.output(diretorio)
 
                     confirma = input("Deseja enviar email? (S/N): ").upper()
 
@@ -644,17 +686,6 @@ def menuRelatorios(dicRelatorios):
                     else:
                         insereRelatorio(dicRelatorios, "NÃO", "NÃO")
 
-                    totalEO = tabela["Óbitos por dia"].sum()
-                    totalEC = tabela["Casos por dia"].sum()
-
-                    for user in BDusuariosRelatorio.keys():
-                        if BDusuariosRelatorio[user][1] in municipios.keys():
-                            totalDeCasos = municipios[BDusuariosRelatorio[user][1]][1]
-                            totalDeObitos = municipios[BDusuariosRelatorio[user][1]][2]
-                            ptotalM = (totalDeCasos*100)/totalEC
-                            ptotalE = ((totalEC - totalDeCasos)*100)/totalEC
-                            grafico6(BDusuariosRelatorio[user][1], ptotalE, ptotalM)
-    
         elif opc == 2:
             data=input("Data a ser consultada: ")
             mostraRelatorio(dicRelatorios, data)
@@ -775,7 +806,21 @@ def criarRelatorioInterface():
 
         for user in BDusuariosRelatorio.keys():
             if BDusuariosRelatorio[user][1] in municipios.keys():
-                pdf.write_html(f"""<font color="black" size=20><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                pdf.image("linha.png", h=50, w=180, x=10)
+
+                url = "https://bing-news-search1.p.rapidapi.com/news/search"
+
+                querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
+
+                headers = {
+                    'x-bingapis-sdk': "true",
+                    'x-rapidapi-host': "bing-news-search1.p.rapidapi.com",
+                    'x-rapidapi-key': "2dba171373msh69cb522f708c18bp155cbbjsn8a376a6c365b"
+                    }
+
+                response = requests.request("GET", url, headers=headers, params=querystring)
+
+                pdf.write_html(f"""<font color="black" size=35><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
                 totalDeCasos = municipios[BDusuariosRelatorio[user][1]][1]
                 totalDeObitos = municipios[BDusuariosRelatorio[user][1]][2]
                 ptotalM = (totalDeCasos*100)/totalEC
@@ -787,6 +832,30 @@ def criarRelatorioInterface():
                 pdf.write_html("""<font color="black" size=10><p align=center>{} equivale à {:.2f}% dos casos do estado de São Paulo({})</p></font> <br>""".format(totalDeCasos, ptotalM, totalEC))
                 pdf.image(path+"/RelatoriosEgraficos/"+f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
                 pdf.write_html(f"""<font color="black" size=10><p align=center>A cada {math.ceil(totalDeCasos/totalDeObitos)} casos de Covid-19 1 morre! (Aproximadamente)</p></font> <br>""")
+
+                pdf.write_html(f"""<font color="green" size=20><p align=center>Notícias do Covid na cidade de {BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                
+                for a in range(0, len(json.loads(response.text)["value"])):
+                    try:
+                        titulo = json.loads(response.text)["value"][a]["name"]
+                        url = json.loads(response.text)["value"][a]["url"]
+                        fonte = json.loads(response.text)["value"][a]["provider"][0]["name"]
+                        description = json.loads(response.text)["value"][a]["description"]
+                        imagem = json.loads(response.text)["value"][a]["image"]["thumbnail"]["contentUrl"]
+                        pdf.image(imagem, h=35, w=35, x=85)
+                        pdf.write_html(f"""
+                        <ul><li>{fonte}</li>
+                            <ol>
+                                <li>{titulo}</li>
+                                <li>{description}</li>
+                                <li><a href='{url}'>Ver notícia</a></li>
+                            </ol>
+                        </ul>
+                        <br><br><br>
+                        """)
+                    except:
+                        print("erro!")
+                
             else:
                 print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
 
