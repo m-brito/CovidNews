@@ -40,6 +40,7 @@ BDusuariosRelatorio = {}
 recuperaUsuarios(BDusuariosRelatorio)
 
 # =====================================Variaveis globais à serem usadas============================
+diretorioDownloads = BDconfiguracoes[10]
 path = os.getcwd()
 datasMinCasos = []
 rcParams['figure.figsize'] = 10, 6
@@ -316,7 +317,6 @@ def grafico6(legenda1, legenda2, qtd1, qtd2, titulo, nomeSalvar):
     plt.close()
 
 def grafico7(legenda1, legenda2, legenda3, legenda4, qtd1, qtd2, qtd3, qtd4, titulo, nomeSalvar):
-    print(legenda1, legenda2, legenda3, legenda4, qtd1, qtd2, qtd3, qtd4, titulo, nomeSalvar)
     labels = legenda1, legenda2, legenda3, legenda4
     sizes = [qtd1, qtd2, qtd3, qtd4]
     explode = (0, 0, 0, 0)
@@ -707,7 +707,7 @@ def menuRelatorios(dicRelatorios):
                                     <br><br><br>
                                     """)
                                 except:
-                                    print("erro!")
+                                    print("Problemas de conversao (Aviso)!")
                             pdf.add_page()
                         else:
                             print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
@@ -914,7 +914,7 @@ def criarRelatorioInterface():
                         <br><br><br>
                         """)
                     except:
-                        print("erro!")
+                        print("Problemas de conversao (Aviso)!")
                     
                 pdf.add_page()
                 

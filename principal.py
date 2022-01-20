@@ -115,6 +115,7 @@ class FuncConfiguracoes():
             self.editarLblPTP(BDconfiguracoes[2], BDconfiguracoes[3])
             self.editarLblPFD(BDconfiguracoes[4], BDconfiguracoes[5])
             self.editarLblPE(BDconfiguracoes[6], BDconfiguracoes[7])
+            self.editarLblDiretorioDonwloads(BDconfiguracoes[10])
         else:
             self.resetarLbl()
 
@@ -133,12 +134,16 @@ class FuncConfiguracoes():
     def editarLblPE(self, px, py):
         self.lblEmail['text'] = f'Posição do "Escrever": ({px}, {py})'
 
+    def editarLblDiretorioDonwloads(self, diretorio):
+        self.lblDiretorioDonwloads['text'] = f'Diretorio de Donwloads: {diretorio}'
+
     def resetarLbl(self):
         self.lblArquivo['text'] = 'Posição do arquivo 1: (Nenhum, Nenhum)'
         self.lblArquivo2['text'] = 'Posição do arquivo 2: (Nenhum, Nenhum)'
         self.lblTresPontos['text'] = 'Posição dos três pontos: (Nenhum, Nenhum)'
         self.lblFzrDownload['text'] = 'Posição do "Fazer Donwload": (Nenhum, Nenhum)'
         self.lblEmail['text'] = 'Posição do "Escrever": (Nenhum, Nenhum)'
+        self.lblDiretorioDonwloads['text'] = 'Diretorio de Donwloads: -------'
 
     def apagarConfigs(self):
         self.BDconfiguracoes = removeConfiguracoesInterface(self.BDconfiguracoes)
@@ -149,7 +154,7 @@ class FuncConfiguracoes():
         if len(self.BDconfiguracoes) <= 0:
             configs = retornarConfigsParaPrograma()
 
-            self.BDconfiguracoes = insereConfiguracoes(self.BDconfiguracoes, configs[0], configs[1], configs[2], configs[3], configs[4], configs[5], configs[6], configs[7], configs[8], configs[9])
+            self.BDconfiguracoes = insereConfiguracoes(self.BDconfiguracoes, configs[0], configs[1], configs[2], configs[3], configs[4], configs[5], configs[6], configs[7], configs[8], configs[9], configs[10])
             gravaConfiguracoes(self.BDconfiguracoes)
             self.BDconfiguracoes = recuperaConfiguracoes()
             self.mostrarConfigs()
@@ -417,8 +422,11 @@ class AplicationConfiguracoes(FuncConfiguracoes):
         self.lblEmail = Label(self.frame1, text='Posicao do "Escrever": (Nenhum, Nenhum)', bg='white')
         self.lblEmail.place(relx=0.35, rely=0.65)
 
-        self.lblAvisoFixo = Label(self.frame1, text='Dados Fixos:', bg='white')
-        self.lblAvisoFixo.place(relx=0.01, rely=0.90)
+        self.lblAvisoFixo = Label(self.frame1, text='Outras configuracoes:', bg='white')
+        self.lblAvisoFixo.place(relx=0.01, rely=0.86)
+
+        self.lblDiretorioDonwloads = Label(self.frame1, text='Diretorio de Donwloads: ---', bg='white')
+        self.lblDiretorioDonwloads.place(relx=0.01, rely=0.90)
 
         self.lblLinkDrive = Label(self.frame1, text='Link do arquivo usado: https://drive.google.com/drive/folders/1dSPGvocU1Tp-KobogpWfCBJF8QXEcSCY?usp=sharing', bg='white')
         self.lblLinkDrive.place(relx=0.01, rely=0.94)
