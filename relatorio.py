@@ -54,7 +54,6 @@ dadosObitosAntepenultimoMes = []
 datasMaxCasos = []
 tabelaDatasMin = """"""
 tabelaDatasMax = """"""
-diretorioDownloads = "C:\\Users\\Windows 10\\Downloads"
 mesesEN = {'jan': (1), 'fev': (2), 'mar': (3), 'abr': (4), 'mai': (5), 'jun': (6), 'jul': (7), 'ago': (8), 'set': (9), 'out': (10), 'nov': (11), 'dez': (12)}
 mesesNE = {'1': ('Janeiro'), '2': ('Fevereiro'), '3': ('Março'), '4': ('Abril'), '5': ('Maio'), '6': ('Junho'), '7': ('Julho'), '8': ('Agosto'), '9': ('Setembro'), '10': ('Outubro'), '11': ('Novembro'), '12': ('Dezembro')}
 municipios = {} #Cod_IBGE - Mun_Total de casos - Mun_Total de óbitos
@@ -573,6 +572,8 @@ def menuRelatorios(dicRelatorios):
 
                     gerarPdfMunicipios()
 
+                    pyautogui.alert("Só mais alguns minutinhos!")
+
                     datas = []
                     ano = 0
                     mes = 0
@@ -776,6 +777,8 @@ def criarRelatorioInterface():
         tabela3 = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
 
         gerarPdfMunicipios()
+
+        pyautogui.alert("Só mais alguns minutinhos!")
 
         datas = []
         ano = 0

@@ -8,6 +8,7 @@ from IPython.display import display
 from gerais import *
 from tkinter import messagebox
 
+
 # ===================Configuracoes==============
 # ====Insere configuracoes====
 def insereConfiguracoes(listaConfiguracoes, positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y):

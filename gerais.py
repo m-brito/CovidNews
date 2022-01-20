@@ -3,6 +3,7 @@ from datetime import datetime as date
 host=""
 hostCovid19 = ""
 chaveCovid19 = ""
+diretorioDownloads = ""
 
 def menu():
     print('1 - Gerenciar Usuarios')

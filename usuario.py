@@ -1,4 +1,5 @@
 from gerais import *
+from tkinter import messagebox
 
 # ===================Usuarios==============
 
@@ -142,17 +143,21 @@ def menuUsuarios(dicUsuarios):
 def insereUsuarioInterface(dic, email, nome, municipio):
     if existeUsuario(dic, email):
         print("Usuario já cadastrado!")
+        messagebox.showinfo("Info", "Usuario já cadastrado!")
     else:
         dic[email]=(nome, municipio)
         print("Dados inseridos com sucesso!")
+        messagebox.showinfo("Info", "Dados inseridos com sucesso!")
 
 # ====Remove um usuario INTERFACE====
 def removeUsuarioInterface(dic,chave):
     if existeUsuario(dic,chave):
         del dic[chave]
         print("Dados apagados com sucesso!")
+        messagebox.showinfo("Info", "Dados apagados com sucesso!")
     else:
         print("Pessoa não cadastrada!")
+        messagebox.showinfo("Info", "Pessoa não cadastrada!")
 
 # ====Altera usuario INTERFACE====
 def alteraUsuarioInterface(dic, chave, nome, municipio):
@@ -160,8 +165,10 @@ def alteraUsuarioInterface(dic, chave, nome, municipio):
         mostraUsuario(dic,chave)
         dic[chave]=(nome, municipio)
         print("Dados alterados com sucesso!")
+        messagebox.showinfo("Info", "Dados alterados com sucesso!")
     else:
         print("Usuario não cadastrado!")
+        messagebox.showinfo("Info", "Usuario não cadastrado!")
 
 # ====Exibe um usuario INTERFACE====
 def mostraUsuarioInterface(dic,chave):
