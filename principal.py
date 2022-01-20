@@ -41,10 +41,16 @@ class FuncsUsuarios():
 
     def addUsuario(self):
         self.variaveis()
-        insereUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome, self.campoMunicipio)
-        self.mostrarUsuarios()
-        self.limparTela()
-        gravaUsuarios(BDusuarios)
+        email = self.campoEmail
+        nome = self.campoNome
+        municipio = self.campoMunicipio
+        if len(str(email).replace(" ", "")) == 0 or len(str(nome).replace(" ", "")) == 0 or len(str(municipio).replace(" ", "")) == 0:
+            messagebox.showinfo("Info", "Preencha todos os campos!")
+        else:
+            insereUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome, self.campoMunicipio)
+            self.mostrarUsuarios()
+            self.limparTela()
+            gravaUsuarios(BDusuarios)
 
     def mostrarUsuarios(self):
         self.listaUsuarios.delete(*self.listaUsuarios.get_children())
@@ -70,10 +76,16 @@ class FuncsUsuarios():
 
     def alterarUsuario(self):
         self.variaveis()
-        alteraUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome, self.campoMunicipio)
-        self.mostrarUsuarios()
-        self.limparTela()
-        gravaUsuarios(BDusuarios)
+        email = self.campoEmail
+        nome = self.campoNome
+        municipio = self.campoMunicipio
+        if len(str(email).replace(" ", "")) == 0 or len(str(nome).replace(" ", "")) == 0 or len(str(municipio).replace(" ", "")) == 0:
+            messagebox.showinfo("Info", "Preencha todos os campos!")
+        else:
+            alteraUsuarioInterface(BDusuarios, self.campoEmail, self.campoNome, self.campoMunicipio)
+            self.mostrarUsuarios()
+            self.limparTela()
+            gravaUsuarios(BDusuarios)
 
     def buscarUsuario(self):
         self.variaveis()

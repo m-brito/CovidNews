@@ -1,5 +1,9 @@
 from datetime import datetime as date
 
+host=""
+hostCovid19 = ""
+chaveCovid19 = ""
+
 def menu():
     print('1 - Gerenciar Usuarios')
     print('2 - Gerenciar Relatorios')

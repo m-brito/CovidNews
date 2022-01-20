@@ -1,6 +1,7 @@
 from datetime import datetime
 from tkinter import Label
 from tkinter.constants import W
+from typing import Sized
 from PIL.Image import new
 import pyautogui
 import time
@@ -32,6 +33,7 @@ import math
 
 import requests
 import json
+from bs4 import BeautifulSoup
 
 BDconfiguracoes = recuperaConfiguracoes()
 BDusuariosRelatorio = {}
@@ -314,6 +316,20 @@ def grafico6(legenda1, legenda2, qtd1, qtd2, titulo, nomeSalvar):
     plt.savefig(path+"\\RelatoriosEgraficos\\"+str(nomeSalvar))
     plt.close()
 
+def grafico7(legenda1, legenda2, legenda3, legenda4, qtd1, qtd2, qtd3, qtd4, titulo, nomeSalvar):
+    print(legenda1, legenda2, legenda3, legenda4, qtd1, qtd2, qtd3, qtd4, titulo, nomeSalvar)
+    labels = legenda1, legenda2, legenda3, legenda4
+    sizes = [qtd1, qtd2, qtd3, qtd4]
+    explode = (0, 0, 0, 0)
+
+    fig1, ax1 = plt.subplots()
+    ax1.set_title(titulo)
+    ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
+            shadow=True, startangle=90)
+    ax1.axis('equal')
+    plt.savefig(path+"\\RelatoriosEgraficos\\"+str(nomeSalvar))
+    plt.close()
+
 def gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos):
     tabelaDatasMin = """
         <font size="15"><p align=center>Datas de menor ocorrencia de casos</p></font>
@@ -374,6 +390,7 @@ def gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos):
     return tabelaDatasMin, tabelaDatasMax
 
 def enviarRelatorioEmail(dataParaArquivo, dataFormatada):
+    recuperaUsuarios(BDusuariosRelatorio)
     diretorio = f"{path}\\RelatorioEnviar\\relatorio-{str(dataParaArquivo)}"
     os.makedirs(diretorio)
     casosAntes = f"{path}\\RelatoriosEgraficos\\casosPorDiaEstado-{dataParaArquivo}.png"
@@ -586,14 +603,10 @@ def menuRelatorios(dicRelatorios):
                     grafico4(tabela, dataRelatorioArquivo, datas)
                     grafico5(tabela, listaDatas, dataRelatorioArquivo)
 
-                    # print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
                     totalEO = tabela["Óbitos por dia"].sum()
                     totalEC = tabela["Casos por dia"].sum()
                     cidade = list(tabela3["Município"]).index("São Carlos")
                     totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
-                    # print(totalE, totalM, list(tabela3["Município"])[cidade])
-
-                    # print("Porcentagem de casos da cidade {} comparado ao total do estado: {:.2f}%".format(list(tabela3["Município"])[cidade], (totalM*100)/totalE))
 
                     pdf = PDF()
                     pdf.add_page()
@@ -617,21 +630,44 @@ def menuRelatorios(dicRelatorios):
                         pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
                     else:
                         pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
+                    pdf.image("linha.png", h=50, w=180, x=10)
+
+                    url = requests.get('https://ibge.gov.br/explica/desemprego.php')
+                    html = url.content
+                    site = BeautifulSoup(html, 'html.parser')
+                    text = str(site).find('var pizzaData = ')
+                    dadosPizza = str(str(site)[(text + 17):str(site)[text:].find('];') + text]).split('{')
+                    totalDados = 0
+                    labels = []
+                    qtds = []
+
+                    for a in range(1, len(dadosPizza)):
+                        dadosJson = (json.loads("{"+str(dadosPizza[a]).replace('},', '}')))
+                        totalDados += int(dadosJson["numPessoas"])
+                        labels.append(dadosJson["status"])
+                        qtds.append(int(dadosJson["numPessoas"]))
+
+                    grafico7(labels[0], labels[1], labels[2], labels[3], int(qtds[0]), int(qtds[1]), int(qtds[2]), int(qtds[3]), "População brasileira, de acordo com as divisões do mercado de trabalho, 3º trimestre 2021", f"desemprego-IBGE-{dataRelatorioArquivo}.png")
+
+                    pdf.image(path+"/RelatoriosEgraficos/desemprego-IBGE-"+dataRelatorioArquivo+".png", h=100, w=180, x=10)
+
+                    texto = "São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar \n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. seguimos com mais alguns dados no relatorio"
+                    pdf.multi_cell(w=140, h=8, txt=texto, align='J')
+
+                    pdf.add_page()
 
                     pdf.write_html(f"""<font color="black" size=25><p align=left>Municipios de usuarios</p></font> <br>""")
 
                     for user in BDusuariosRelatorio.keys():
                         if BDusuariosRelatorio[user][1] in municipios.keys():
-                            pdf.image("linha.png", h=50, w=180, x=10)
-
-                            url = "https://bing-news-search1.p.rapidapi.com/news/search"
+                            url = host+"/news/search"
 
                             querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
 
                             headers = {
                                 'x-bingapis-sdk': "true",
-                                'x-rapidapi-host': "bing-news-search1.p.rapidapi.com",
-                                'x-rapidapi-key': "2dba171373msh69cb522f708c18bp155cbbjsn8a376a6c365b"
+                                'x-rapidapi-host': str(hostCovid19),
+                                'x-rapidapi-key': str(chaveCovid19)
                                 }
 
                             response = requests.request("GET", url, headers=headers, params=querystring)
@@ -671,10 +707,11 @@ def menuRelatorios(dicRelatorios):
                                     """)
                                 except:
                                     print("erro!")
-                            
+                            pdf.add_page()
                         else:
                             print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
-
+                    pdf.set_font('times', '', 25)
+                    pdf.multi_cell(w=190, h=25, txt="Vida social, econômica e profissional das pessoas vão ter grandes impactos gerados pela pandemia no mundo todo!", align='C')
                     diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
                     pdf.output(diretorio)
 
@@ -770,14 +807,10 @@ def criarRelatorioInterface():
         grafico4(tabela, dataRelatorioArquivo, datas)
         grafico5(tabela, listaDatas, dataRelatorioArquivo)
 
-        # print("Porcentagem de casos minimos que tiveram comparado ao total: {:.2f}%".format(float((len(datasMinCasos)*100)/len(listaCasos))))
         totalEO = tabela["Óbitos por dia"].sum()
         totalEC = tabela["Casos por dia"].sum()
         cidade = list(tabela3["Município"]).index("São Carlos")
         totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
-        # print(totalE, totalM, list(tabela3["Município"])[cidade])
-
-        # print("Porcentagem de casos da cidade {} comparado ao total do estado: {:.2f}%".format(list(tabela3["Município"])[cidade], (totalM*100)/totalE))
 
         pdf = PDF()
         pdf.add_page()
@@ -801,21 +834,45 @@ def criarRelatorioInterface():
             pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
         else:
             pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
+        pdf.image("linha.png", h=50, w=180, x=10)
+         
+        url = requests.get('https://ibge.gov.br/explica/desemprego.php')
+        html = url.content
+        site = BeautifulSoup(html, 'html.parser')
+        text = str(site).find('var pizzaData = ')
+        dadosPizza = str(str(site)[(text + 17):str(site)[text:].find('];') + text]).split('{')
+        totalDados = 0
+        labels = []
+        qtds = []
+
+        for a in range(1, len(dadosPizza)):
+            dadosJson = (json.loads("{"+str(dadosPizza[a]).replace('},', '}')))
+            totalDados += int(dadosJson["numPessoas"])
+            labels.append(dadosJson["status"])
+            qtds.append(int(dadosJson["numPessoas"]))
+
+        grafico7(labels[0], labels[1], labels[2], labels[3], int(qtds[0]), int(qtds[1]), int(qtds[2]), int(qtds[3]), "População brasileira, de acordo com as divisões do mercado de trabalho, 3º trimestre 2021", f"desemprego-IBGE-{dataRelatorioArquivo}.png")
+
+        pdf.add_page()
+
+        pdf.image(path+"/RelatoriosEgraficos/desemprego-IBGE-"+dataRelatorioArquivo+".png", h=100, w=180, x=10)
+
+        texto = "São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar \n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. seguimos com mais alguns dados no relatorio"
+        pdf.multi_cell(w=0, h=8, txt=texto, align='J')
+
+        pdf.add_page()
 
         pdf.write_html(f"""<font color="black" size=25><p align=left>Municipios de usuarios</p></font> <br>""")
-
         for user in BDusuariosRelatorio.keys():
             if BDusuariosRelatorio[user][1] in municipios.keys():
-                pdf.image("linha.png", h=50, w=180, x=10)
-
-                url = "https://bing-news-search1.p.rapidapi.com/news/search"
+                url = host+"/news/search"
 
                 querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
 
                 headers = {
                     'x-bingapis-sdk': "true",
-                    'x-rapidapi-host': "bing-news-search1.p.rapidapi.com",
-                    'x-rapidapi-key': "2dba171373msh69cb522f708c18bp155cbbjsn8a376a6c365b"
+                    'x-rapidapi-host': str(hostCovid19),
+                    'x-rapidapi-key': str(chaveCovid19)
                     }
 
                 response = requests.request("GET", url, headers=headers, params=querystring)
@@ -855,10 +912,14 @@ def criarRelatorioInterface():
                         """)
                     except:
                         print("erro!")
+                    
+                pdf.add_page()
                 
             else:
                 print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
-
+        
+        pdf.set_font('times', '', 25)
+        pdf.multi_cell(w=190, h=8, txt="Vida social, econômica e profissional das pessoas vão ter grandes impactos gerados pela pandemia no mundo todo!", align='C')
         diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
         pdf.output(diretorio)
         pyautogui.alert('Volte à tela do programa!')
