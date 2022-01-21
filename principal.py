@@ -198,11 +198,15 @@ class FuncRelatorio():
             self.listaRelatorio.insert("", END, values=(data, tupla[0], tupla[1]))
 
     def criandoRelatorio(self):
-        data, enviou, editou = criarRelatorioInterface()
-        insereRelatorioInterface(BDrelatorio, data, enviou, editou)
-        gravaRelatorios(BDrelatorio)
-        recuperaRelatorios(BDrelatorio)
-        self.mostrarRelatorios()
+        try:
+            data, enviou, editou = criarRelatorioInterface()
+            insereRelatorioInterface(BDrelatorio, data, enviou, editou)
+            gravaRelatorios(BDrelatorio)
+            recuperaRelatorios(BDrelatorio)
+            self.mostrarRelatorios()
+        except:
+            print("Tivemos alguns problemas para criar o relatorio")
+            messagebox.showinfo("Info", "Tivemos alguns problemas para criar o relatorio!")
 
     def criaRelatorio(self):
         dataArq = str(dataAtualFArquivo())

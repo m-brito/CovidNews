@@ -561,168 +561,196 @@ def menuRelatorios(dicRelatorios):
                 print("3 - Siga os passos explicados no pdf!!!")
             elif confirma == "S":
                 if len(BDconfiguracoes) > 9:
-                    baixarArquivos()
-                    tabelinha = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-estado.csv", encoding="ANSI", sep=";")
-                    tabelinha.to_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx", index = None, header=True)
-                    tabelinha3 = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-municipios.csv", encoding="ANSI", sep=";")
-                    tabelinha3.to_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx", index = None, header=True)
+                    arquivoEncontrado = True
+                    okcancelJaBaixado = messagebox.askokcancel("Atenção", "Você deseja fazer o relatorio de um arquivo ja baixado(diretorio de downloads)?")
+                    if okcancelJaBaixado != True:
+                        baixarArquivos()
+                    try:
+                        tabelinha = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-estado.csv", encoding="ANSI", sep=";")
+                        tabelinha.to_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx", index = None, header=True)
+                        tabelinha3 = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-municipios.csv", encoding="ANSI", sep=";")
+                        tabelinha3.to_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx", index = None, header=True)
 
-                    tabela = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
-                    tabela3 = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                        tabela = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                        tabela3 = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                    except:
+                        arquivoEncontrado = False
+                        print("Arquivo não encontrado!")
+                        messagebox.showinfo("Info", "Arquivo não encontrado!")
+                    
+                    if arquivoEncontrado == True:
 
-                    gerarPdfMunicipios()
+                        gerarPdfMunicipios()
 
-                    pyautogui.alert("Só mais alguns minutinhos!")
+                        pyautogui.alert("Só mais alguns minutinhos!")
 
-                    datas = []
-                    ano = 0
-                    mes = 0
-                    dia = 0
-                    for data in tabela["Data"]:
-                        mes = (str(data).split('/'))
-                        if(isnumber(mes[1])==True):
-                            mes = int(mes[1])
+                        datas = []
+                        ano = 0
+                        mes = 0
+                        dia = 0
+                        for data in tabela["Data"]:
+                            mes = (str(data).split('/'))
+                            if(isnumber(mes[1])==True):
+                                mes = int(mes[1])
+                            else:
+                                mes = int(mesesEN[str(mes[1])])
+                            dia = int(str(data).split("/")[0])
+                            ano = int(str(data).split("/")[2])
+                            x = datetime(ano, mes, dia)
+                            datas.append(x)
+
+                        listaDatas = list(tabela["Data"])
+                        listaCasos = list(tabela["Casos por dia"])
+                        listaCasos = np.array(listaCasos)
+                        minCasos = tabela["Casos por dia"].min()
+                        maxCasos = tabela["Casos por dia"].max()
+                        indicesMin = np.where(listaCasos == int(minCasos))
+                        indicesMax = np.where(listaCasos == int(maxCasos))
+
+                        tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
+                        grafico1(tabela, dataRelatorioArquivo, datas)
+                        grafico2(tabela, dataRelatorioArquivo, datas)
+                        grafico3(tabela, dataRelatorioArquivo, datas)
+                        grafico4(tabela, dataRelatorioArquivo, datas)
+                        grafico5(tabela, listaDatas, dataRelatorioArquivo)
+
+                        totalEO = tabela["Óbitos por dia"].sum()
+                        totalEC = tabela["Casos por dia"].sum()
+                        cidade = list(tabela3["Município"]).index("São Carlos")
+                        totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
+
+                        pdf = PDF()
+                        pdf.add_page()
+                        pdf.write_html(f"""<font color="black" size=30><p align=center>{totalEC} casos no estado de São Paulo</p></font> <br>""")
+                        pdf.write_html(f"""<font color="black" size=30><p align=center>{totalEO} óbitos no estado de São Paulo</p></font> <br>""")
+                        pdf.write_html(f"""<font color="black" size=25><p align=left>Gerais</p></font> <br>
+                                        <font size="12" color="#1a0dab"><p align=center><a href="casosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
+                                        <font size="12" color="#1a0dab"><p align=center><a href="obitosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
+                                        <font size="12" color="#1a0dab"><p align=center><a href="totalDeCasosEstado-{str(str(dataRelatorioArquivo))}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
+                        pdf.image(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
+                        pdf.write_html(tabelaDatasMin)
+                        pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
+                        pdf.write_html(tabelaDatasMax)
+                        pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
+                        pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
+                        if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
+                            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado)))
                         else:
-                            mes = int(mesesEN[str(mes[1])])
-                        dia = int(str(data).split("/")[0])
-                        ano = int(str(data).split("/")[2])
-                        x = datetime(ano, mes, dia)
-                        datas.append(x)
-
-                    listaDatas = list(tabela["Data"])
-                    listaCasos = list(tabela["Casos por dia"])
-                    listaCasos = np.array(listaCasos)
-                    minCasos = tabela["Casos por dia"].min()
-                    maxCasos = tabela["Casos por dia"].max()
-                    indicesMin = np.where(listaCasos == int(minCasos))
-                    indicesMax = np.where(listaCasos == int(maxCasos))
-
-                    tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
-                    grafico1(tabela, dataRelatorioArquivo, datas)
-                    grafico2(tabela, dataRelatorioArquivo, datas)
-                    grafico3(tabela, dataRelatorioArquivo, datas)
-                    grafico4(tabela, dataRelatorioArquivo, datas)
-                    grafico5(tabela, listaDatas, dataRelatorioArquivo)
-
-                    totalEO = tabela["Óbitos por dia"].sum()
-                    totalEC = tabela["Casos por dia"].sum()
-                    cidade = list(tabela3["Município"]).index("São Carlos")
-                    totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
-
-                    pdf = PDF()
-                    pdf.add_page()
-                    pdf.write_html(f"""<font color="black" size=30><p align=center>{totalEC} casos no estado de São Paulo</p></font> <br>""")
-                    pdf.write_html(f"""<font color="black" size=30><p align=center>{totalEO} óbitos no estado de São Paulo</p></font> <br>""")
-                    pdf.write_html(f"""<font color="black" size=25><p align=left>Gerais</p></font> <br>
-                                    <font size="12" color="#1a0dab"><p align=center><a href="casosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
-                                    <font size="12" color="#1a0dab"><p align=center><a href="obitosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
-                                    <font size="12" color="#1a0dab"><p align=center><a href="totalDeCasosEstado-{str(str(dataRelatorioArquivo))}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
-                    pdf.image(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
-                    pdf.write_html(tabelaDatasMin)
-                    pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
-                    pdf.write_html(tabelaDatasMax)
-                    pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
-                    pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
-                    if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
-                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado)))
-                    else:
-                        pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado))*100)/sum(dadosCausasMesPassado)))
-                    if sum(dadosObitosMesRetrasado) > sum(dadosObitosMesPassado):
-                        pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
-                    else:
-                        pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
-                    pdf.image("linha.png", h=50, w=180, x=10)
-
-                    url = requests.get('https://ibge.gov.br/explica/desemprego.php')
-                    html = url.content
-                    site = BeautifulSoup(html, 'html.parser')
-                    text = str(site).find('var pizzaData = ')
-                    dadosPizza = str(str(site)[(text + 17):str(site)[text:].find('];') + text]).split('{')
-                    totalDados = 0
-                    labels = []
-                    qtds = []
-
-                    for a in range(1, len(dadosPizza)):
-                        dadosJson = (json.loads("{"+str(dadosPizza[a]).replace('},', '}')))
-                        totalDados += int(dadosJson["numPessoas"])
-                        labels.append(dadosJson["status"])
-                        qtds.append(int(dadosJson["numPessoas"]))
-
-                    grafico7(labels[0], labels[1], labels[2], labels[3], int(qtds[0]), int(qtds[1]), int(qtds[2]), int(qtds[3]), "População brasileira, de acordo com as divisões do mercado de trabalho, 3º trimestre 2021", f"desemprego-IBGE-{dataRelatorioArquivo}.png")
-
-                    pdf.image(path+"/RelatoriosEgraficos/desemprego-IBGE-"+dataRelatorioArquivo+".png", h=100, w=180, x=10)
-
-                    texto = "São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar \n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. seguimos com mais alguns dados no relatorio"
-                    pdf.multi_cell(w=140, h=8, txt=texto, align='J')
-
-                    pdf.add_page()
-
-                    pdf.write_html(f"""<font color="black" size=25><p align=left>Municipios de usuarios</p></font> <br>""")
-
-                    for user in BDusuariosRelatorio.keys():
-                        if BDusuariosRelatorio[user][1] in municipios.keys():
-                            url = host+"/news/search"
-
-                            querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
-
-                            headers = {
-                                'x-bingapis-sdk': "true",
-                                'x-rapidapi-host': str(hostCovid19),
-                                'x-rapidapi-key': str(chaveCovid19)
-                                }
-
-                            response = requests.request("GET", url, headers=headers, params=querystring)
-
-                            pdf.write_html(f"""<font color="black" size=35><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
-                            totalDeCasos = municipios[BDusuariosRelatorio[user][1]][1]
-                            totalDeObitos = municipios[BDusuariosRelatorio[user][1]][2]
-                            ptotalM = (totalDeCasos*100)/totalEC
-                            ptotalE = ((totalEC - totalDeCasos)*100)/totalEC
-                            ptotaMC = (totalDeObitos*100)/totalDeCasos
-                            grafico6("Resto do Estado", BDusuariosRelatorio[user][1], ptotalE, ptotalM, f"Casos de {BDusuariosRelatorio[user][1]} comparado ao resto do estado", f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png")
-                            grafico6("Casos", "Mortes", 100-ptotaMC, ptotaMC, f"Casos/Óbitos - {totalDeCasos}/{totalDeObitos}", f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png")
-                            pdf.image(path+"/RelatoriosEgraficos/"+f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
-                            pdf.write_html("""<font color="black" size=10><p align=center>{} equivale à {:.2f}% dos casos do estado de São Paulo({})</p></font> <br>""".format(totalDeCasos, ptotalM, totalEC))
-                            pdf.image(path+"/RelatoriosEgraficos/"+f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
-                            pdf.write_html(f"""<font color="black" size=10><p align=center>A cada {math.ceil(totalDeCasos/totalDeObitos)} casos de Covid-19 1 morre! (Aproximadamente)</p></font> <br>""")
-
-                            pdf.write_html(f"""<font color="green" size=20><p align=center>Notícias do Covid na cidade de {BDusuariosRelatorio[user][1]}</p></font> <br>""")
-                            
-                            for a in range(0, len(json.loads(response.text)["value"])):
-                                try:
-                                    titulo = json.loads(response.text)["value"][a]["name"]
-                                    url = json.loads(response.text)["value"][a]["url"]
-                                    fonte = json.loads(response.text)["value"][a]["provider"][0]["name"]
-                                    description = json.loads(response.text)["value"][a]["description"]
-                                    imagem = json.loads(response.text)["value"][a]["image"]["thumbnail"]["contentUrl"]
-                                    pdf.image(imagem, h=35, w=35, x=85)
-                                    pdf.write_html(f"""
-                                    <ul><li>{fonte}</li>
-                                        <ol>
-                                            <li>{titulo}</li>
-                                            <li>{description}</li>
-                                            <li><a href='{url}'>Ver notícia</a></li>
-                                        </ol>
-                                    </ul>
-                                    <br><br><br>
-                                    """)
-                                except:
-                                    print("Problemas de conversao (Aviso)!")
-                            pdf.add_page()
+                            pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado))*100)/sum(dadosCausasMesPassado)))
+                        if sum(dadosObitosMesRetrasado) > sum(dadosObitosMesPassado):
+                            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
                         else:
-                            print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
-                    pdf.set_font('times', '', 25)
-                    pdf.multi_cell(w=190, h=25, txt="Vida social, econômica e profissional das pessoas vão ter grandes impactos gerados pela pandemia no mundo todo!", align='C')
-                    diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
-                    pdf.output(diretorio)
+                            pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
+                        pdf.image("linha.png", h=50, w=180, x=10)
 
-                    confirma = input("Deseja enviar email? (S/N): ").upper()
+                        url = requests.get('https://ibge.gov.br/explica/desemprego.php')
+                        html = url.content
+                        site = BeautifulSoup(html, 'html.parser')
+                        print(site)
+                        text = str(site).find('var pizzaData = ')
+                        dadosPizza = str(str(site)[(text + 17):str(site)[text:].find('];') + text]).split('{')
+                        totalDados = 0
+                        labels = []
+                        qtds = []
 
-                    if confirma == "S":
-                        enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
-                        insereRelatorio(dicRelatorios, "SIM", "NÃO")
-                    else:
-                        insereRelatorio(dicRelatorios, "NÃO", "NÃO")
+                        for a in range(1, len(dadosPizza)):
+                            dadosJson = (json.loads("{"+str(dadosPizza[a]).replace('},', '}')))
+                            totalDados += int(dadosJson["numPessoas"])
+                            labels.append(dadosJson["status"])
+                            qtds.append(int(dadosJson["numPessoas"]))
+
+                        grafico7(labels[0], labels[1], labels[2], labels[3], int(qtds[0]), int(qtds[1]), int(qtds[2]), int(qtds[3]), "População brasileira, de acordo com as divisões do mercado de trabalho, 3º trimestre 2021", f"desemprego-IBGE-{dataRelatorioArquivo}.png")
+
+                        pdf.image(path+"/RelatoriosEgraficos/desemprego-IBGE-"+dataRelatorioArquivo+".png", h=100, w=180, x=10)
+
+                        # texto = "São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar \n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. seguimos com mais alguns dados no relatorio"
+                        # pdf.multi_cell(w=140, h=8, txt=texto, align='J')
+                        pdf.write_html(f"""<font color="black" size=12><p align=justify>São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar \n\n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. seguimos com mais alguns dados no relatorio</p></font> <br>""")
+
+                        pdf.add_page()
+
+                        pdf.write_html(f"""<font color="black" size=25><p align=left>Municipios de usuarios</p></font> <br>""")
+
+                        for user in BDusuariosRelatorio.keys():
+                            if BDusuariosRelatorio[user][1] in municipios.keys():
+                                url = host+"/news/search"
+
+                                querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
+
+                                headers = {
+                                    'x-bingapis-sdk': "true",
+                                    'x-rapidapi-host': str(hostCovid19),
+                                    'x-rapidapi-key': str(chaveCovid19)
+                                    }
+
+                                response = requests.request("GET", url, headers=headers, params=querystring)
+
+                                pdf.write_html(f"""<font color="black" size=35><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                                totalDeCasos = municipios[BDusuariosRelatorio[user][1]][1]
+                                totalDeObitos = municipios[BDusuariosRelatorio[user][1]][2]
+                                ptotalM = (totalDeCasos*100)/totalEC
+                                ptotalE = ((totalEC - totalDeCasos)*100)/totalEC
+                                ptotaMC = (totalDeObitos*100)/totalDeCasos
+                                grafico6("Resto do Estado", BDusuariosRelatorio[user][1], ptotalE, ptotalM, f"Casos de {BDusuariosRelatorio[user][1]} comparado ao resto do estado", f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png")
+                                grafico6("Casos", "Mortes", 100-ptotaMC, ptotaMC, f"Casos/Óbitos - {totalDeCasos}/{totalDeObitos}", f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png")
+                                pdf.image(path+"/RelatoriosEgraficos/"+f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
+                                pdf.write_html("""<font color="black" size=10><p align=center>{} equivale à {:.2f}% dos casos do estado de São Paulo({})</p></font> <br>""".format(totalDeCasos, ptotalM, totalEC))
+                                pdf.image(path+"/RelatoriosEgraficos/"+f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
+                                pdf.write_html(f"""<font color="black" size=10><p align=center>A cada {math.ceil(totalDeCasos/totalDeObitos)} casos de Covid-19 1 morre! (Aproximadamente)</p></font> <br>""")
+
+                                pdf.write_html(f"""<font color="green" size=20><p align=center>Notícias do Covid na cidade de {BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                                
+                                for a in range(0, len(json.loads(response.text)["value"])):
+                                    try:
+                                        titulo = json.loads(response.text)["value"][a]["name"]
+                                        url = json.loads(response.text)["value"][a]["url"]
+                                        fonte = json.loads(response.text)["value"][a]["provider"][0]["name"]
+                                        description = json.loads(response.text)["value"][a]["description"]
+                                        imagem = json.loads(response.text)["value"][a]["image"]["thumbnail"]["contentUrl"]
+                                        pdf.image(imagem, h=35, w=35, x=85)
+                                        pdf.write_html(f"""
+                                        <ul><li>{fonte}</li>
+                                            <ol>
+                                                <li>{titulo}</li>
+                                                <li>{description}</li>
+                                                <li><a href='{url}'>Ver notícia</a></li>
+                                            </ol>
+                                        </ul>
+                                        <br><br><br>
+                                        """)
+                                    except:
+                                        print("Problemas de conversao (Aviso)!")
+                                pdf.add_page()
+                            else:
+                                print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
+                        pdf.set_font('times', '', 25)
+                        pdf.multi_cell(w=190, h=25, txt="Vida social, econômica e profissional das pessoas vão ter grandes impactos gerados pela pandemia no mundo todo!", align='C')
+                        diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
+                        pdf.output(diretorio)
+
+                        confirma = input("Deseja enviar email? (S/N): ").upper()
+
+                        if confirma == "S":
+                            enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
+                            if okcancelJaBaixado != True:
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                            else:
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                            insereRelatorio(dicRelatorios, "SIM", "NÃO")
+                        else:
+                            if okcancelJaBaixado != True:
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                            else:
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                                os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                            insereRelatorio(dicRelatorios, "NÃO", "NÃO")
 
         elif opc == 2:
             data=input("Data a ser consultada: ")
@@ -767,179 +795,203 @@ def criarRelatorioInterface():
     BDconfiguracoes = recuperaConfiguracoes()
     recuperaUsuarios(BDusuariosRelatorio)
     if len(BDconfiguracoes) > 9:
-        baixarArquivos()
-        tabelinha = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-estado.csv", encoding="ANSI", sep=";")
-        tabelinha.to_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx", index = None, header=True)
-        tabelinha3 = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-municipios.csv", encoding="ANSI", sep=";")
-        tabelinha3.to_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx", index = None, header=True)
+        arquivoEncontrado = True
+        okcancelJaBaixado = messagebox.askokcancel("Atenção", "Você deseja fazer o relatorio de um arquivo ja baixado(diretorio de downloads)?")
+        if okcancelJaBaixado != True:
+            baixarArquivos()
+        try:
+            tabelinha = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-estado.csv", encoding="ANSI", sep=";")
+            tabelinha.to_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx", index = None, header=True)
+            tabelinha3 = pd.read_csv (f"{diretorioDownloads}\\Dados-covid-19-municipios.csv", encoding="ANSI", sep=";")
+            tabelinha3.to_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx", index = None, header=True)
 
-        tabela = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
-        tabela3 = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
-
-        gerarPdfMunicipios()
-
-        pyautogui.alert("Só mais alguns minutinhos!")
-
-        datas = []
-        ano = 0
-        mes = 0
-        dia = 0
-        for data in tabela["Data"]:
-            mes = (str(data).split('/'))
-            if(isnumber(mes[1])==True):
-                mes = int(mes[1])
-            else:
-                mes = int(mesesEN[str(mes[1])])
-            dia = int(str(data).split("/")[0])
-            ano = int(str(data).split("/")[2])
-            x = datetime(ano, mes, dia)
-            datas.append(x)
-
-        listaDatas = list(tabela["Data"])
-        listaCasos = list(tabela["Casos por dia"])
-        listaCasos = np.array(listaCasos)
-        minCasos = tabela["Casos por dia"].min()
-        maxCasos = tabela["Casos por dia"].max()
-        indicesMin = np.where(listaCasos == int(minCasos))
-        indicesMax = np.where(listaCasos == int(maxCasos))
-
-        tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
-        grafico1(tabela, dataRelatorioArquivo, datas)
-        grafico2(tabela, dataRelatorioArquivo, datas)
-        grafico3(tabela, dataRelatorioArquivo, datas)
-        grafico4(tabela, dataRelatorioArquivo, datas)
-        grafico5(tabela, listaDatas, dataRelatorioArquivo)
-
-        totalEO = tabela["Óbitos por dia"].sum()
-        totalEC = tabela["Casos por dia"].sum()
-        cidade = list(tabela3["Município"]).index("São Carlos")
-        totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
-
-        pdf = PDF()
-        pdf.add_page()
-        pdf.write_html("""<font color="black" size=25><p align=left>Gerais</p></font> <br>""")
-        pdf.write_html(f"""<font color="black" size=20><p align=center>{totalEC} casos no estado de São Paulo</p></font> <br>""")
-        pdf.write_html(f"""<font color="black" size=20><p align=center>{totalEO} óbitos no estado de São Paulo</p></font> <br>""")
-        pdf.write_html(f"""<font size="12" color="#1a0dab"><p align=center><a href="casosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
-                        <font size="12" color="#1a0dab"><p align=center><a href="obitosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
-                        <font size="12" color="#1a0dab"><p align=center><a href="totalDeCasosEstado-{str(str(dataRelatorioArquivo))}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
-        pdf.image(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
-        pdf.write_html(tabelaDatasMin)
-        pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
-        pdf.write_html(tabelaDatasMax)
-        pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
-        pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
-        if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
-            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado)))
-        else:
-            pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado))*100)/sum(dadosCausasMesPassado)))
-        if sum(dadosObitosMesRetrasado) > sum(dadosObitosMesPassado):
-            pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
-        else:
-            pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
-        pdf.image("linha.png", h=50, w=180, x=10)
-         
-        url = requests.get('https://ibge.gov.br/explica/desemprego.php')
-        html = url.content
-        site = BeautifulSoup(html, 'html.parser')
-        text = str(site).find('var pizzaData = ')
-        dadosPizza = str(str(site)[(text + 17):str(site)[text:].find('];') + text]).split('{')
-        totalDados = 0
-        labels = []
-        qtds = []
-
-        for a in range(1, len(dadosPizza)):
-            dadosJson = (json.loads("{"+str(dadosPizza[a]).replace('},', '}')))
-            totalDados += int(dadosJson["numPessoas"])
-            labels.append(dadosJson["status"])
-            qtds.append(int(dadosJson["numPessoas"]))
-
-        grafico7(labels[0], labels[1], labels[2], labels[3], int(qtds[0]), int(qtds[1]), int(qtds[2]), int(qtds[3]), "População brasileira, de acordo com as divisões do mercado de trabalho, 3º trimestre 2021", f"desemprego-IBGE-{dataRelatorioArquivo}.png")
-
-        pdf.add_page()
-
-        pdf.image(path+"/RelatoriosEgraficos/desemprego-IBGE-"+dataRelatorioArquivo+".png", h=100, w=180, x=10)
-
-        texto = "São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar \n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. seguimos com mais alguns dados no relatorio"
-        pdf.multi_cell(w=0, h=8, txt=texto, align='J')
-
-        pdf.add_page()
-
-        pdf.write_html(f"""<font color="black" size=25><p align=left>Municipios de usuarios</p></font> <br>""")
-        for user in BDusuariosRelatorio.keys():
-            if BDusuariosRelatorio[user][1] in municipios.keys():
-                url = host+"/news/search"
-
-                querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
-
-                headers = {
-                    'x-bingapis-sdk': "true",
-                    'x-rapidapi-host': str(hostCovid19),
-                    'x-rapidapi-key': str(chaveCovid19)
-                    }
-
-                response = requests.request("GET", url, headers=headers, params=querystring)
-
-                pdf.write_html(f"""<font color="black" size=35><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
-                totalDeCasos = municipios[BDusuariosRelatorio[user][1]][1]
-                totalDeObitos = municipios[BDusuariosRelatorio[user][1]][2]
-                ptotalM = (totalDeCasos*100)/totalEC
-                ptotalE = ((totalEC - totalDeCasos)*100)/totalEC
-                ptotaMC = (totalDeObitos*100)/totalDeCasos
-                grafico6("Resto do Estado", BDusuariosRelatorio[user][1], ptotalE, ptotalM, f"Casos de {BDusuariosRelatorio[user][1]} comparado ao resto do estado", f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png")
-                grafico6("Casos", "Mortes", 100-ptotaMC, ptotaMC, f"Casos/Óbitos - {totalDeCasos}/{totalDeObitos}", f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png")
-                pdf.image(path+"/RelatoriosEgraficos/"+f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
-                pdf.write_html("""<font color="black" size=10><p align=center>{} equivale à {:.2f}% dos casos do estado de São Paulo({})</p></font> <br>""".format(totalDeCasos, ptotalM, totalEC))
-                pdf.image(path+"/RelatoriosEgraficos/"+f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
-                pdf.write_html(f"""<font color="black" size=10><p align=center>A cada {math.ceil(totalDeCasos/totalDeObitos)} casos de Covid-19 1 morre! (Aproximadamente)</p></font> <br>""")
-
-                pdf.write_html(f"""<font color="green" size=20><p align=center>Notícias do Covid na cidade de {BDusuariosRelatorio[user][1]}</p></font> <br>""")
-                
-                for a in range(0, len(json.loads(response.text)["value"])):
-                    try:
-                        titulo = json.loads(response.text)["value"][a]["name"]
-                        url = json.loads(response.text)["value"][a]["url"]
-                        fonte = json.loads(response.text)["value"][a]["provider"][0]["name"]
-                        description = json.loads(response.text)["value"][a]["description"]
-                        imagem = json.loads(response.text)["value"][a]["image"]["thumbnail"]["contentUrl"]
-                        pdf.image(imagem, h=35, w=35, x=85)
-                        pdf.write_html(f"""
-                        <ul><li>{fonte}</li>
-                            <ol>
-                                <li>{titulo}</li>
-                                <li>{description}</li>
-                                <li><a href='{url}'>Ver notícia</a></li>
-                            </ol>
-                        </ul>
-                        <br><br><br>
-                        """)
-                    except:
-                        print("Problemas de conversao (Aviso)!")
-                    
-                pdf.add_page()
-                
-            else:
-                print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
+            tabela = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+            tabela3 = pd.read_excel(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+        except:
+            arquivoEncontrado = False
+            print("Arquivo não encontrado!")
+            messagebox.showinfo("Info", "Arquivo não encontrado!")
         
-        pdf.set_font('times', '', 25)
-        pdf.multi_cell(w=190, h=8, txt="Vida social, econômica e profissional das pessoas vão ter grandes impactos gerados pela pandemia no mundo todo!", align='C')
-        diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
-        pdf.output(diretorio)
-        pyautogui.alert('Volte à tela do programa!')
-        okcancel = messagebox.askokcancel("Atenção", "Deseja enviar email?")
-        if okcancel == True:
-            enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
-            return dataAtualF(), "SIM", "NÃO"
-        else:
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
-            os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
-            return dataAtualF(), "NÃO", "NÃO"
+        if arquivoEncontrado == True:
+
+            gerarPdfMunicipios()
+
+            pyautogui.alert("Só mais alguns minutinhos!")
+
+            datas = []
+            ano = 0
+            mes = 0
+            dia = 0
+            for data in tabela["Data"]:
+                mes = (str(data).split('/'))
+                if(isnumber(mes[1])==True):
+                    mes = int(mes[1])
+                else:
+                    mes = int(mesesEN[str(mes[1])])
+                dia = int(str(data).split("/")[0])
+                ano = int(str(data).split("/")[2])
+                x = datetime(ano, mes, dia)
+                datas.append(x)
+
+            listaDatas = list(tabela["Data"])
+            listaCasos = list(tabela["Casos por dia"])
+            listaCasos = np.array(listaCasos)
+            minCasos = tabela["Casos por dia"].min()
+            maxCasos = tabela["Casos por dia"].max()
+            indicesMin = np.where(listaCasos == int(minCasos))
+            indicesMax = np.where(listaCasos == int(maxCasos))
+
+            tabelaDatasMin, tabelaDatasMax = gerarTabelas(indicesMin, listaDatas, minCasos, indicesMax, maxCasos)
+            grafico1(tabela, dataRelatorioArquivo, datas)
+            grafico2(tabela, dataRelatorioArquivo, datas)
+            grafico3(tabela, dataRelatorioArquivo, datas)
+            grafico4(tabela, dataRelatorioArquivo, datas)
+            grafico5(tabela, listaDatas, dataRelatorioArquivo)
+
+            totalEO = tabela["Óbitos por dia"].sum()
+            totalEC = tabela["Casos por dia"].sum()
+            cidade = list(tabela3["Município"]).index("São Carlos")
+            totalM = list(tabela3["Mun_Total de óbitos"])[cidade]
+
+            pdf = PDF()
+            pdf.add_page()
+            pdf.write_html("""<font color="black" size=25><p align=left>Gerais</p></font> <br>""")
+            pdf.write_html(f"""<font color="black" size=20><p align=center>{totalEC} casos no estado de São Paulo</p></font> <br>""")
+            pdf.write_html(f"""<font color="black" size=20><p align=center>{totalEO} óbitos no estado de São Paulo</p></font> <br>""")
+            pdf.write_html(f"""<font size="12" color="#1a0dab"><p align=center><a href="casosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Casos por dia - Estado(Clique aqui)</a></p></font>
+                            <font size="12" color="#1a0dab"><p align=center><a href="obitosPorDiaEstado-{str(str(dataRelatorioArquivo))}.png">Óbitos por dia - Estado(Clique aqui)</a></p></font>
+                            <font size="12" color="#1a0dab"><p align=center><a href="totalDeCasosEstado-{str(str(dataRelatorioArquivo))}.png">Total de casos - Estado(Clique aqui)</a></p></font>""")
+            pdf.image(path+"/RelatoriosEgraficos/dadosEstado-"+str(dataRelatorioArquivo)+".png", h=100, w=200, x=10)
+            pdf.write_html(tabelaDatasMin)
+            pdf.write_html("<font color='green'><p align=center>{} dias de casos minimos equivale a {:.2f}% do total de dias em pandemia</p></font><br><br><br><br><br><br>".format(len(indicesMin[0]), float((len(datasMinCasos)*100)/len(listaCasos))))
+            pdf.write_html(tabelaDatasMax)
+            pdf.write_html("<font color='green'><p align=center>Isso equivale {:.2f}% do total de casos desde o inicio da pandemia!</p></font>".format(float((maxCasos)*100)/tabela["Casos por dia"].sum()))
+            pdf.image(path+"/RelatoriosEgraficos/dadosComparativos-"+str(dataRelatorioArquivo)+".png", h=100, w=180, x=10)
+            if sum(dadosCausasMesRetrasado) > sum(dadosCausasMesPassado):
+                pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado)), float(float(sum(dadosCausasMesRetrasado) - sum(dadosCausasMesPassado))*100)/sum(dadosCausasMesRetrasado)))
+            else:
+                pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de casos referente ao mes retrasado!</p></font>".format(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado)), float(float(sum(dadosCausasMesPassado) - sum(dadosCausasMesRetrasado))*100)/sum(dadosCausasMesPassado)))
+            if sum(dadosObitosMesRetrasado) > sum(dadosObitosMesPassado):
+                pdf.write_html("<font color='green'><p align=center>Mes passado teve uma diminuicao de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado)), float(float(sum(dadosObitosMesRetrasado) - sum(dadosObitosMesPassado))*100)/sum(dadosObitosMesRetrasado)))
+            else:
+                pdf.write_html("<font color='red'><p align=center>Mes passado teve um aumento de {:.1f}({:.2f}%) de óbitos referente ao mes retrasado!</p></font><br><br><br><br><br><br>".format(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado)), float(float(sum(dadosObitosMesPassado) - sum(dadosObitosMesRetrasado))*100)/sum(dadosObitosMesPassado)))
+            pdf.image("linha.png", h=50, w=180, x=10)
+            
+            url = requests.get('https://ibge.gov.br/explica/desemprego.php')
+            html = url.content
+            site = BeautifulSoup(html, 'html.parser')
+            dadosDesempregados = str(site).find('<h3 class="variavel-titulo">Desempregados <small>(desocupados)</small></h3>')
+            dadosDesempregados = str(str(site)[(dadosDesempregados + 75):str(site)[dadosDesempregados:].find('</ul>') + dadosDesempregados]).split('<p class="variavel-dado">')
+            dadosTexto = []
+            for a in range(1,len(dadosDesempregados)):
+                dadosTexto.append(dadosDesempregados[a][:dadosDesempregados[a].find('</p>')])
+            text = str(site).find('var pizzaData = ')
+            dadosPizza = str(str(site)[(text + 17):str(site)[text:].find('];') + text]).split('{')
+            totalDados = 0
+            labels = []
+            qtds = []
+
+            for a in range(1, len(dadosPizza)):
+                dadosJson = (json.loads("{"+str(dadosPizza[a]).replace('},', '}')))
+                totalDados += int(dadosJson["numPessoas"])
+                labels.append(dadosJson["status"])
+                qtds.append(int(dadosJson["numPessoas"]))
+
+            grafico7(labels[0], labels[1], labels[2], labels[3], int(qtds[0]), int(qtds[1]), int(qtds[2]), int(qtds[3]), "População brasileira, de acordo com as divisões do mercado de trabalho, 3º trimestre 2021", f"desemprego-IBGE-{dataRelatorioArquivo}.png")
+
+            pdf.add_page()
+
+            pdf.image(path+"/RelatoriosEgraficos/desemprego-IBGE-"+dataRelatorioArquivo+".png", h=100, w=180, x=10)
+
+            # texto = "São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar \n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. seguimos com mais alguns dados no relatorio"
+            # pdf.multi_cell(w=0, h=8, txt=texto, align='J')    
+            pdf.write_html(f"""<font color="black" size=12><p align=justify>São varias as consequencias causadas pela pandemia em todo o mundo, O que é notório é que seus efeitos trágicos impactaram na vida social, econômica e profissional das pessoas em todo mundo. \n\n\nA economia mundial terá enormes perdas, pois as atividades agrícolas, comerciais, industriais e de turismo estão sofrendo uma queda bem grande na sua produtividade por conta do isolamento, as ações da Bolsa de Valores oscilarão grandes variações.\n\n\nFatores que poderão causar em um futuro próximo, principalmente nas nações menos desenvolvidas economicamente, desemprego, aumento dos índices inflacionários, escassez de alimentos e crescimento da desigualdade social, da violência urbana e criminalidade. \n\n\nDesemprego por exemplo, mesmo antes de pandemia no Brasil, o desemprego já era um problema na vida de boa parte da população. Afinal, a economia não estava indo bem há um tempo, e como podemos ver nos graficos, com o alto indice de casos do novo coronavírus, muitas vagas de emprego foram fechadas. Por conta disso, só nos primeiros meses do ano de 2020, segundo o IBGE, quase 5 milhões de pessoas tiveram que parar de trabalhar\n\nAinda no 3º trimestre 2021: \n\nDesempregados(desocupados)  <font color="red">{dadosTexto[0]}</font>\n\nTaxa de desemprego(desocupados)  <font color="red">{dadosTexto[1]}</font>\n\nDesalentados <font color="red">{dadosTexto[2]}</font>\n\nTaxa de subutilizacao  <font color="red">{dadosTexto[3]}</font> \n\n\nA pandemia no Brasil fez a desigualdade se tornar ainda mais evidente. Isso porque ficou claro que nem todo mundo tem condições de seguir as mesmas medidas de prevenção. E seguimos agora com mais alguns dados no relatorio</p></font> <br>""")
+
+            pdf.add_page()
+
+            pdf.write_html(f"""<font color="black" size=25><p align=left>Municipios de usuarios</p></font> <br>""")
+            for user in BDusuariosRelatorio.keys():
+                if BDusuariosRelatorio[user][1] in municipios.keys():
+                    url = host+"/news/search"
+
+                    querystring = {"q":f"Covid 19 "+BDusuariosRelatorio[user][1],"freshness":"Day","textFormat":"Raw","safeSearch":"Off"}
+
+                    headers = {
+                        'x-bingapis-sdk': "true",
+                        'x-rapidapi-host': str(hostCovid19),
+                        'x-rapidapi-key': str(chaveCovid19)
+                        }
+
+                    response = requests.request("GET", url, headers=headers, params=querystring)
+
+                    pdf.write_html(f"""<font color="black" size=35><p align=center>{BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                    totalDeCasos = municipios[BDusuariosRelatorio[user][1]][1]
+                    totalDeObitos = municipios[BDusuariosRelatorio[user][1]][2]
+                    ptotalM = (totalDeCasos*100)/totalEC
+                    ptotalE = ((totalEC - totalDeCasos)*100)/totalEC
+                    ptotaMC = (totalDeObitos*100)/totalDeCasos
+                    grafico6("Resto do Estado", BDusuariosRelatorio[user][1], ptotalE, ptotalM, f"Casos de {BDusuariosRelatorio[user][1]} comparado ao resto do estado", f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png")
+                    grafico6("Casos", "Mortes", 100-ptotaMC, ptotaMC, f"Casos/Óbitos - {totalDeCasos}/{totalDeObitos}", f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png")
+                    pdf.image(path+"/RelatoriosEgraficos/"+f"casos-{BDusuariosRelatorio[user][1]}-estado-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
+                    pdf.write_html("""<font color="black" size=10><p align=center>{} equivale à {:.2f}% dos casos do estado de São Paulo({})</p></font> <br>""".format(totalDeCasos, ptotalM, totalEC))
+                    pdf.image(path+"/RelatoriosEgraficos/"+f"obitos-casos-{BDusuariosRelatorio[user][1]}-{dataRelatorioArquivo}.png", h=100, w=180, x=10)
+                    pdf.write_html(f"""<font color="black" size=10><p align=center>A cada {math.ceil(totalDeCasos/totalDeObitos)} casos de Covid-19 1 morre! (Aproximadamente)</p></font> <br>""")
+
+                    pdf.write_html(f"""<font color="green" size=20><p align=center>Notícias do Covid na cidade de {BDusuariosRelatorio[user][1]}</p></font> <br>""")
+                    
+                    for a in range(0, len(json.loads(response.text)["value"])):
+                        try:
+                            titulo = json.loads(response.text)["value"][a]["name"]
+                            url = json.loads(response.text)["value"][a]["url"]
+                            fonte = json.loads(response.text)["value"][a]["provider"][0]["name"]
+                            description = json.loads(response.text)["value"][a]["description"]
+                            imagem = json.loads(response.text)["value"][a]["image"]["thumbnail"]["contentUrl"]
+                            pdf.image(imagem, h=35, w=35, x=85)
+                            pdf.write_html(f"""
+                            <ul><li>{fonte}</li>
+                                <ol>
+                                    <li>{titulo}</li>
+                                    <li>{description}</li>
+                                    <li><a href='{url}'>Ver notícia</a></li>
+                                </ol>
+                            </ul>
+                            <br><br><br>
+                            """)
+                        except:
+                            print("Problemas de conversao (Aviso)!")
+                        
+                    pdf.add_page()
+                    
+                else:
+                    print(f"O municipio '{BDusuariosRelatorio[user][1]}' do usuario de email '{user}' é invalido!")
+            
+            pdf.set_font('times', '', 25)
+            pdf.multi_cell(w=190, h=8, txt="Vida social, econômica e profissional das pessoas vão ter grandes impactos gerados pela pandemia no mundo todo!", align='C')
+            diretorio = f"{path}\\RelatoriosEgraficos\\relatorio-{dataRelatorioArquivo}.pdf"
+            pdf.output(diretorio)
+            pyautogui.alert('Volte à tela do programa!')
+            okcancel = messagebox.askokcancel("Atenção", "Deseja enviar email?")
+            if okcancel == True:
+                enviarRelatorioEmail(dataRelatorioArquivo, dataAtualF())
+                if okcancelJaBaixado != True:
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                else:
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                return dataAtualF(), "SIM", "NÃO"
+            else:
+                if okcancelJaBaixado != True:
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.csv")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.csv")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                else:
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-estado.xlsx")
+                    os.remove(f"{diretorioDownloads}\\Dados-covid-19-municipios.xlsx")
+                return dataAtualF(), "NÃO", "NÃO"
         
 
 # ====ALTERA RELATORIO INTERFACE====
