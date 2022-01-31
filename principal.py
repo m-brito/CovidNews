@@ -560,41 +560,44 @@ class AplicationUsuarios(FuncsUsuarios):
         fileMenu.add_command(label='Sair', command= self.sair)
         fileMenu2.add_command(label='Limpa Usuarios', command= self.limparTela)
 
-AplicationUsuarios()
+if host=="" or hostCovid19=="" or chaveCovid19=="":
+    print("Preencha os valores no arquivo 'geral.py' para conseguir rodar!")
+else:
+    AplicationUsuarios()
 
-# =======================================================================
+    # =======================================================================
 
 
-def verificarConfiguracoes(msgErro):
-    if len(BDconfiguracoes) == 0:
-        print(f'\n====================================================================\n{msgErro}\n====================================================================\n')
-        return False
-    else:
-        return True
+    def verificarConfiguracoes(msgErro):
+        if len(BDconfiguracoes) == 0:
+            print(f'\n====================================================================\n{msgErro}\n====================================================================\n')
+            return False
+        else:
+            return True
 
-opc = 1
+    opc = 1
 
-while ( opc != 0 and opc > 0 and opc <4 ):
-    BDconfiguracoes = recuperaConfiguracoes()
-    menu()
-
-    opc = int( input("Digite uma opção: ") )
-        
-    if opc == 1:
-        menuUsuarios(BDusuarios)
-        print("\n\n\n\n")
-            
-    elif opc == 2:
+    while ( opc != 0 and opc > 0 and opc <4 ):
         BDconfiguracoes = recuperaConfiguracoes()
-        if verificarConfiguracoes('Voce não consegue acessar aqui sem antes configurar o app!!!') == True:
-            menuRelatorios(BDrelatorio)
+        menu()
+
+        opc = int( input("Digite uma opção: ") )
+            
+        if opc == 1:
+            menuUsuarios(BDusuarios)
+            print("\n\n\n\n")
+                
+        elif opc == 2:
+            BDconfiguracoes = recuperaConfiguracoes()
+            if verificarConfiguracoes('Voce não consegue acessar aqui sem antes configurar o app!!!') == True:
+                menuRelatorios(BDrelatorio)
+                print("\n\n\n\n")
+
+        elif opc == 3:
+            BDconfiguracoes = recuperaConfiguracoes()
+            menuConfiguracoes(BDconfiguracoes)
             print("\n\n\n\n")
 
-    elif opc == 3:
-        BDconfiguracoes = recuperaConfiguracoes()
-        menuConfiguracoes(BDconfiguracoes)
-        print("\n\n\n\n")
-
-print("\n\n*** FIM DO PROGRAMA ***\n\n")
+    print("\n\n*** FIM DO PROGRAMA ***\n\n")
 
 os.system('pause')
