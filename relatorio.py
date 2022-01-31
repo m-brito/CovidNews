@@ -7,6 +7,9 @@ import pyautogui
 import time
 import pyperclip
 import pandas as pd
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import os
 from IPython.display import display
@@ -58,6 +61,8 @@ tabelaDatasMax = """"""
 mesesEN = {'jan': (1), 'fev': (2), 'mar': (3), 'abr': (4), 'mai': (5), 'jun': (6), 'jul': (7), 'ago': (8), 'set': (9), 'out': (10), 'nov': (11), 'dez': (12)}
 mesesNE = {'1': ('Janeiro'), '2': ('Fevereiro'), '3': ('Março'), '4': ('Abril'), '5': ('Maio'), '6': ('Junho'), '7': ('Julho'), '8': ('Agosto'), '9': ('Setembro'), '10': ('Outubro'), '11': ('Novembro'), '12': ('Dezembro')}
 municipios = {} #Cod_IBGE - Mun_Total de casos - Mun_Total de óbitos
+BASE_URL_1 = 'https://www.seade.gov.br/wp-content/uploads/coronavirus-files/Dados-covid-19-estado.csv'
+BASE_URL_2 = 'https://www.seade.gov.br/wp-content/uploads/coronavirus-files/Dados-covid-19-municipios.csv'
 # ======================================================================================================
 
 # ====Verifica se relatorio existe====
@@ -157,6 +162,25 @@ def isnumber(value):
     except ValueError:
          return False
     return True
+
+def baixarCsvGoverno():
+    if len(BDconfiguracoes) > 9:
+        try:
+            baixar_arquivo_site(BASE_URL_1, diretorioDownloads+'/Dados-covid-19-estado.csv')
+            baixar_arquivo_site(BASE_URL_2, diretorioDownloads+'/Dados-covid-19-municipios.csv')
+        except:
+            print("Erro ao baixar arquivos do link "+BASE_URL_1)
+            print("Erro ao baixar arquivos do link "+BASE_URL_2)
+
+def baixar_arquivo_site(url, endereco):
+    # faz requisição ao servidor
+    resposta = requests.get(url)
+    if resposta.status_code == requests.codes.OK:
+        with open(endereco, 'wb') as novo_arquivo:
+            novo_arquivo.write(resposta.content)
+        print("Donwload finalizado. Salvo em: {}".format(endereco))
+    else:
+        resposta.raise_for_status()
 
 def baixarArquivos():
     BDconfiguracoes = recuperaConfiguracoes()
@@ -537,14 +561,15 @@ def gerarPdfMunicipios():
 # ====Menu de relatorios====
 def menuRelatorios(dicRelatorios):
     opc = 1
-    while (opc != 6):
+    while (opc != 7):
         print("\nGerenciamento de relatorios:\n")
         print("1 - Criar relatorio de hoje (Forma automatica)!")
         print("2 - Mostra um relatorio")
         print("3 - Mostra todos os relatorios")
         print("4 - Abrir")
         print("5 - Enviar")
-        print("6 - Sair do menu de relatorios")
+        print("6 - Baixar arquivos csv do site do governo")
+        print("7 - Sair do menu de relatorios")
 
         opc = int( input("Digite uma opção: ") )
 
@@ -786,6 +811,9 @@ def menuRelatorios(dicRelatorios):
                 print("O arquivo não existe!!!")
 
         elif opc == 6:
+            baixarCsvGoverno()
+
+        elif opc == 7:
             gravaRelatorios(dicRelatorios)
         
 # =====================================================================

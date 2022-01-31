@@ -248,6 +248,9 @@ class FuncRelatorio():
         else:
             print("O arquivo não existe!!!")
 
+    def baixarCsvGov(self):
+        baixarCsvGoverno()
+
     def enviarRelatorio(self):
         self.variaveis()
         data = str(self.campoData)
@@ -304,6 +307,9 @@ class AplicationRelatorio(FuncRelatorio):
 
         self.btnBuscar = Button(self.frame1, text='Buscar', bg='#EBEBEB', command=self.buscarRelatorio)
         self.btnBuscar.place(relx=0.5, rely=0.1, relwidth=0.1, relheight=0.15)
+        
+        self.btnBaixar = Button(self.frame1, text='CSV Governo', bg='#EBEBEB', command=self.baixarCsvGov)
+        self.btnBaixar.place(relx=0.6, rely=0.1, relwidth=0.15, relheight=0.15)
 
         self.btnNovo = Button(self.frame1, text='Criar', bg='#EBEBEB', command=self.criaRelatorio)
         self.btnNovo.place(relx=0.8, rely=0.1, relwidth=0.1, relheight=0.15)
