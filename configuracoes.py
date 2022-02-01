@@ -80,24 +80,27 @@ def gravaConfiguracoes(listaConfiguracoes):
 # ======Pega dados do arquivo====
 def recuperaConfiguracoes():
     if (existe_arquivo("configuracoes.txt")):
-        arq = open("configuracoes.txt", "r")
-        listaConfiguracoes = []
-        for linha in arq:
-            linha = linha[:len(linha)-1]
-            lista = linha.split(";")
-            positionArqX = lista[0]
-            positionArqY = lista[1]
-            positionArq2X = lista[8]
-            positionArq2Y = lista[9]
-            positionTresPontosX = lista[2]
-            positionTresPontosY = lista[3]
-            positionFazerDownloadX = lista[4]
-            positionFazerDownloadY = lista[5]
-            positionEmailX = lista[6]
-            positionEmailY = lista[7]
-            diretorioDonwloads = lista[10]
-            listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y, diretorioDonwloads]
-        return listaConfiguracoes
+        try:
+            arq = open("configuracoes.txt", "r")
+            listaConfiguracoes = []
+            for linha in arq:
+                linha = linha[:len(linha)-1]
+                lista = linha.split(";")
+                positionArqX = lista[0]
+                positionArqY = lista[1]
+                positionArq2X = lista[8]
+                positionArq2Y = lista[9]
+                positionTresPontosX = lista[2]
+                positionTresPontosY = lista[3]
+                positionFazerDownloadX = lista[4]
+                positionFazerDownloadY = lista[5]
+                positionEmailX = lista[6]
+                positionEmailY = lista[7]
+                diretorioDonwloads = lista[10]
+                listaConfiguracoes = [positionArqX, positionArqY, positionTresPontosX, positionTresPontosY, positionFazerDownloadX, positionFazerDownloadY, positionEmailX, positionEmailY, positionArq2X, positionArq2Y, diretorioDonwloads]
+            return listaConfiguracoes
+        except:
+            print("Erro ao tentar ler arquivos de configuracoes")
     else:
         return []
 

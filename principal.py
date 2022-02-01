@@ -271,14 +271,20 @@ class FuncRelatorio():
 
 class AplicationRelatorio(FuncRelatorio):
     def __init__(self):
-        self.janelaRelatorios = Tk()
-        self.telaRelatorios()
-        self.framesDaTela()
-        self.widgetsFrame1()
-        self.listaFrame2()
-        self.mostrarRelatorios()
-        self.menu()
-        self.janelaRelatorios.mainloop()
+        BDconfiguracoes = recuperaConfiguracoes()
+        if len(BDconfiguracoes) < 10:
+            print("Primeiro configure o sistema")
+            pyautogui.alert('Primeiro configure o sistema')
+            AplicationUsuarios()
+        else:
+            self.janelaRelatorios = Tk()
+            self.telaRelatorios()
+            self.framesDaTela()
+            self.widgetsFrame1()
+            self.listaFrame2()
+            self.mostrarRelatorios()
+            self.menu()
+            self.janelaRelatorios.mainloop()
     
     def telaUsuarios(self):
         self.janelaRelatorios.destroy()

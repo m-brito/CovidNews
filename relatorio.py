@@ -43,7 +43,10 @@ BDusuariosRelatorio = {}
 recuperaUsuarios(BDusuariosRelatorio)
 
 # =====================================Variaveis globais à serem usadas============================
-diretorioDownloads = BDconfiguracoes[10]
+try:
+    diretorioDownloads = BDconfiguracoes[10]
+except:
+    print("Erro ao pegar diretorio de downloads")
 path = os.getcwd()
 datasMinCasos = []
 rcParams['figure.figsize'] = 10, 6
