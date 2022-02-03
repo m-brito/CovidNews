@@ -291,10 +291,17 @@ def grafico5(tabela, listaDatas, dataRelatorioArquivo):
                 dadosCausasMesRetrasado.append(int(tabela["Casos por dia"][x]))
                 dadosObitosMesRetrasado.append(int(tabela["Óbitos por dia"][x]))
             if int(dataFra) == antepenultimoMes:
+                datafraAnte = str((tabela["Data"][x-1])).split('/')
+                if(isnumber(datafraAnte[1])==True):
+                    datafraAnte = int(datafraAnte[1])
+                else:
+                    datafraAnte = int(mesesEN[str(datafraAnte[1])])
+                if datafraAnte != antepenultimoMes:
+                    continua = False
                 datasMesRetrasado.append(tabela["Data"][x])
                 dadosCausasAntepenultimoMes.append(int(tabela["Casos por dia"][x]))
                 dadosObitosAntepenultimoMes.append(int(tabela["Óbitos por dia"][x]))
-            if x==0 or int(dataFra) < antepenultimoMes:
+            if x==0:
                 continua = False
             else:
                 x-=1
